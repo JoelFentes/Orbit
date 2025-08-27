@@ -8,11 +8,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        aguamarinha: "#86e7b8ff",
-        "verde-claro": "#93ff96ff",
-        "verde-claro-2": "#b2ffa8ff",
-        "verde-cha": "#d0ffb7ff",
-        bege: "#f2f5deff",
+        "azul-celeste": "#78c0e0ff",   // sky-blue
+        "azul-celestial": "#449dd1ff", // celestial-blue
+        "azul-marinho": "#150578ff",   // navy-blue
+        "azul-federal": "#0e0e52ff",   // federal-blue
+        "azul-violeta": "#3943b7ff",   // violet-blue
+        bege: "#f2f5deff",             
       },
       fontFamily: {
         "quicksand-light": ["Quicksand_300Light"],
