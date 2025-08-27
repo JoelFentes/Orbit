@@ -1,15 +1,51 @@
 import { SafeAreaView, View, Text } from "react-native";
 import { useState } from "react";
-
-import { router } from "expo-router";
+import { Alert } from "react-native";
 import ButtonEs from "../../../components/ButtonEs";
 import InputEs from "../../../components/InputEs";
+
+import { router } from "expo-router";
+
 
 export default function Signup() {
     const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
+
+    async function handleSignup() {
+        if (senha !== confirmarSenha) {
+            Alert.alert("Erro", "As senhas não conferem!");
+            return;
+        }
+
+        try {
+            const response = await fetch("https://geofencing-backend-2kse.onrender.com/api/users/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: nome,
+                    email,
+                    password: senha,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Erro ao cadastrar");
+            }
+
+            const data = await response.json();
+            console.log("Usuário criado:", data);
+
+            Alert.alert("Sucesso", "Conta criada com sucesso!");
+            router.push("/screens/auth/login");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Erro", "Não foi possível criar a conta.");
+        }
+    }
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center bg-white">
@@ -61,7 +97,7 @@ export default function Signup() {
 
                 <ButtonEs
                     title="Cadastrar"
-                    onPress={() => router.back()}
+                    onPress={handleSignup}
                     className="mt-12 bg-azul-celeste"
                 />
             </View>
