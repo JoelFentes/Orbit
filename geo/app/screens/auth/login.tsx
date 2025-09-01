@@ -1,4 +1,4 @@
-import { SafeAreaView, View, Text, Image } from "react-native";
+import { SafeAreaView, View, Text, Image, Alert } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
 
@@ -7,12 +7,40 @@ import InputEs from "../../../components/InputEs";
 
 export default function Login() {
     const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
+    const [password, setPassword] = useState("");
+
+    async function handleLogin() {
+        try {
+            const response = await fetch("https://geofencing-backend-2kse.onrender.com/api/users/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password: password,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Erro ao fazer login");
+            }
+
+            const data = await response.json();
+            console.log("Login realizado:", data);
+
+            Alert.alert("Sucesso", "Login realizado com sucesso!");
+            // Redireciona para a tela principal após o login
+            router.push("/screens/auth/reset-password");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Erro", "E-mail ou senha incorretos.");
+        }
+    }
 
     return (
         <SafeAreaView className="flex-1 items-center justify-center bg-white">
             <View className="p-8 h-[48rem] w-[23rem] bg-slate-50 rounded-2xl shadow-lg">
-                {/* Logo no topo */}
                 <View className="items-center">
                     <Image
                         source={require("../../../assets/images/orbita.png")}
@@ -21,7 +49,6 @@ export default function Login() {
                     />
                 </View>
 
-                {/* Títulos */}
                 <Text className="font-quicksand-bold text-3xl text-center text-azul-escuro">
                     Bem-vindo de volta!
                 </Text>
@@ -29,7 +56,6 @@ export default function Login() {
                     Faça login para continuar
                 </Text>
 
-                {/* Inputs */}
                 <InputEs
                     label="E-mail"
                     placeholder="Digite seu e-mail"
@@ -41,12 +67,11 @@ export default function Login() {
                     label="Senha"
                     placeholder="Digite sua senha"
                     secureTextEntry
-                    value={senha}
-                    onChangeText={setSenha}
+                    value={password}
+                    onChangeText={setPassword}
                     className="mt-2 border-transparent"
                 />
 
-                {/* Esqueceu a senha */}
                 <Text
                     className="mt-3 font-quicksand-regular text-sm text-azul-celestial pl-1"
                     onPress={() => router.push("/screens/auth/reset-password")}
@@ -54,14 +79,12 @@ export default function Login() {
                     Esqueceu a senha?
                 </Text>
 
-                {/* Botão login */}
                 <ButtonEs
                     title="Entrar"
-                    onPress={() => router.back()}
+                    onPress={handleLogin}
                     className="mt-12 bg-azul-celeste"
                 />
 
-                {/* Cadastro */}
                 <Text
                     className="mt-6 font-quicksand-regular text-base text-center"
                     onPress={() => router.push("/screens/auth/signup")}
