@@ -1,15 +1,21 @@
-import { SafeAreaView, View, Text, Image, Alert } from "react-native";
+import { SafeAreaView, View, Text, Image, Alert, ActivityIndicator } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
 
 import ButtonEs from "../../../components/ButtonEs";
 import InputEs from "../../../components/InputEs";
+import { useAuth } from "../../../contexts/AuthContext"; // Ajuste o caminho
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
 
     async function handleLogin() {
+        setLoading(true);
+
         try {
             const response = await fetch("https://geofencing-backend-2kse.onrender.com/api/users/login", {
                 method: "POST",
@@ -29,12 +35,21 @@ export default function Login() {
             const data = await response.json();
             console.log("Login realizado:", data);
 
-            Alert.alert("Sucesso", "Login realizado com sucesso!");
-            // Redireciona para a tela principal após o login
-            router.push("/screens/auth/reset-password");
+            // Salvar o token no SecureStore
+            await SecureStore.setItemAsync('userToken', data.token);
+
+            // Atualizar o contexto de autenticação
+            if (login) {
+                await login(data.token);
+            }
+
+            // Redireciona para a tela principal
+            router.replace("../main/home");
         } catch (error) {
             console.error(error);
             Alert.alert("Erro", "E-mail ou senha incorretos.");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -62,6 +77,7 @@ export default function Login() {
                     value={email}
                     onChangeText={setEmail}
                     className="mt-8 border-transparent"
+                    editable={!loading}
                 />
                 <InputEs
                     label="Senha"
@@ -70,24 +86,31 @@ export default function Login() {
                     value={password}
                     onChangeText={setPassword}
                     className="mt-2 border-transparent"
+                    editable={!loading}
                 />
 
                 <Text
                     className="mt-3 font-quicksand-regular text-sm text-azul-celestial pl-1"
-                    onPress={() => router.push("/screens/auth/reset-password")}
+                    onPress={() => !loading && router.push("/screens/auth/reset-password")}
                 >
                     Esqueceu a senha?
                 </Text>
 
-                <ButtonEs
-                    title="Entrar"
-                    onPress={handleLogin}
-                    className="mt-12 bg-azul-celeste"
-                />
+                {loading ? (
+                    <View className="mt-12 bg-azul-celeste rounded-lg h-12 items-center justify-center">
+                        <ActivityIndicator color="white" size="small" />
+                    </View>
+                ) : (
+                    <ButtonEs
+                        title="Entrar"
+                        onPress={handleLogin}
+                        className="mt-12 bg-azul-celeste"
+                    />
+                )}
 
                 <Text
                     className="mt-6 font-quicksand-regular text-base text-center"
-                    onPress={() => router.push("/screens/auth/signup")}
+                    onPress={() => !loading && router.push("/screens/auth/signup")}
                 >
                     Não tem uma conta?{" "}
                     <Text className="font-quicksand-bold text-azul-celestial">

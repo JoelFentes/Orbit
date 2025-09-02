@@ -7,6 +7,7 @@ interface InputEsProps {
     value?: string;
     onChangeText?: (text: string) => void;
     className?: string;
+    editable?: boolean;
 }
 
 export default function InputEs({

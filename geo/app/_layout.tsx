@@ -9,6 +9,7 @@ import {
   Quicksand_700Bold,
 } from "@expo-google-fonts/quicksand";
 import '../global.css'
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -23,5 +24,5 @@ export default function Layout() {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <AuthProvider> <Stack screenOptions={{ headerShown: false }} /> </AuthProvider>;
 }
