@@ -31,7 +31,7 @@ export default function BottomNavigation({ currentRoute = "home", onNavigate }: 
                         {item.isCenter ? (
                             <TouchableOpacity
                                 onPress={() => handlePress(item.id)}
-                                className="w-14 h-14 bg-azul-celeste rounded-full items-center justify-center -mt-8 shadow-lg"
+                                className="w-20 h-20 bg-azul-celeste rounded-full items-center justify-center -mt-8 shadow-lg"
                             >
                                 <Ionicons name={item.icon as any} size={28} color="white" />
                             </TouchableOpacity>
@@ -43,7 +43,7 @@ export default function BottomNavigation({ currentRoute = "home", onNavigate }: 
                                 <Ionicons
                                     name={item.icon as any}
                                     size={28}
-                                    color={currentRoute === item.id ? "#3B82F6" : "#6B7280"}
+                                    color={currentRoute === item.id ? "#78c0e0ff" : "#6B7280"}
                                 />
                                 <Text
                                     className={`text-xs mt-1 ${currentRoute === item.id ? "text-azul-celeste font-quicksand-medium" : "text-gray-500 font-quicksand-regular"

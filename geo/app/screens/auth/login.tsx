@@ -40,8 +40,8 @@ export default function Login() {
 
             // Atualizar o contexto de autenticação
             if (login) {
-                await login(data.token);
-            }
+                 await login(data.token, data.user);                             
+                }
 
             // Redireciona para a tela principal
             router.replace("../main/home");

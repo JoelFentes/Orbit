@@ -83,7 +83,6 @@ export default function Onboarding() {
         }
     };
 
-    // Mostrar tela de carregamento enquanto verifica
     if (isLoading) {
         return (
             <View className="flex-1 justify-center items-center bg-white">
@@ -110,7 +109,7 @@ export default function Onboarding() {
                         {item.type === "logo" && (
                             <View className="flex-row items-center mb-10">
                                 <Image source={item.image} style={{ width: 60, height: 60, marginRight: 12 }} resizeMode="contain" />
-                                <Text className="font-quicksand-bold text-4xl">Orbit Reminder</Text>
+                                <Text className="font-quicksand-bold text-4xl">Orbit Notes</Text>
                             </View>
                         )}
 
