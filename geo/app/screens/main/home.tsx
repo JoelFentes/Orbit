@@ -17,7 +17,6 @@ export default function Home() {
     const handleNavigation = (route: string) => {
         setCurrentRoute(route);
 
-        // Navegação para outras telas (ajuste conforme suas rotas)
         switch (route) {
             case "calendar":
                 router.push("/screens/main/calendar");
@@ -51,16 +50,16 @@ export default function Home() {
 
             {/* Conteúdo principal */}
             <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 80 }}>
-                    <Text className="font-quicksand-semibold text-3xl text-azul-escuro mt-6">
-                        Olá {user?.name ?? 'visitante'}, com o que podemos te ajudar hoje?
-                    </Text>
+                <Text className="font-quicksand-semibold text-3xl text-azul-escuro mt-6">
+                    Olá {user?.name ?? 'visitante'}, com o que podemos te ajudar hoje?
+                </Text>
 
                 <View className="bg-cinza-claro rounded-2xl p-5 mt-2">
                     <View className="flex-row justify-between items-center">
                         <Text className="font-quicksand-medium text-lg text-azul-escuro">
-                            Lembretes de hoje
+                            Lembretes
                         </Text>
-                         <TouchableOpacity onPress={handleText}>
+                        <TouchableOpacity onPress={handleText}>
                             <Text className="font-quicksand-regular text-base text-azul-celestial">
                                 Ver todos
                             </Text>
@@ -91,13 +90,13 @@ export default function Home() {
                     <View className="flex-row justify-between items-center">
                         <Text className="font-quicksand-medium text-lg text-azul-escuro mt-4">
                             Minhas Pastas
-                        </Text> 
+                        </Text>
                         <TouchableOpacity onPress={handleText}>
-                            <Text  className="font-quicksand-regular text-base text-azul-celestial">
+                            <Text className="font-quicksand-regular text-base text-azul-celestial">
                                 Ver todos
                             </Text>
                         </TouchableOpacity>
-                    </View> 
+                    </View>
                     <TouchableOpacity onPress={handleText} className="bg-azul-celeste/10 w-76 h-40 rounded-2xl mt-4">
 
                     </TouchableOpacity>

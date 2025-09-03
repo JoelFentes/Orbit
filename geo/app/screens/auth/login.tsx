@@ -40,8 +40,8 @@ export default function Login() {
 
             // Atualizar o contexto de autenticação
             if (login) {
-                 await login(data.token, data.user);                             
-                }
+                await login(data.token, data.user);
+            }
 
             // Redireciona para a tela principal
             router.replace("../main/home");
@@ -104,7 +104,6 @@ export default function Login() {
                     <ButtonEs
                         title="Entrar"
                         onPress={handleLogin}
-                        className="mt-12 bg-azul-celeste"
                     />
                 )}
 

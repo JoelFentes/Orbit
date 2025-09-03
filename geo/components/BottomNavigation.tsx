@@ -25,7 +25,7 @@ export default function BottomNavigation({ currentRoute = "home", onNavigate }: 
 
     return (
         <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 pt-2">
-            <View className="flex-row justify-around items-center pb-8">
+            <View className="flex-row justify-around items-center pb-4">
                 {navigationItems.map((item) => (
                     <View key={item.id} className="justify-center items-center">
                         {item.isCenter ? (
@@ -42,15 +42,10 @@ export default function BottomNavigation({ currentRoute = "home", onNavigate }: 
                             >
                                 <Ionicons
                                     name={item.icon as any}
-                                    size={28}
+                                    size={24}
                                     color={currentRoute === item.id ? "#78c0e0ff" : "#6B7280"}
                                 />
-                                <Text
-                                    className={`text-xs mt-1 ${currentRoute === item.id ? "text-azul-celeste font-quicksand-medium" : "text-gray-500 font-quicksand-regular"
-                                        }`}
-                                >
-                                    {item.label}
-                                </Text>
+
                             </TouchableOpacity>
                         )}
                     </View>
