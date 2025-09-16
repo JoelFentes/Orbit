@@ -30,7 +30,6 @@ Imagine receber um lembrete de "comprar pão" assim que você passar perto da pa
 
 - [React Native](https://reactnative.dev/) (com [Expo](https://expo.dev/))
 - [TypeScript](https://www.typescriptlang.org/)
-- [Firebase](https://firebase.google.com/) (autenticação e banco de dados)
 - [Expo Router](https://expo.github.io/router/)
 - [TailwindCSS (Nativewind)](https://www.nativewind.dev/) para estilização
 - [Ionicons](https://ionic.io/ionicons) para ícones
