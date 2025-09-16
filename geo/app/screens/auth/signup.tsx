@@ -98,7 +98,7 @@ export default function Signup() {
                 <ButtonEs
                     title="Cadastrar"
                     onPress={handleSignup}
-                    className="mt-12 bg-azul-celeste"
+                    className="mt-12 bg-azul-celeste p-4 items-center rounded-xl"
                 />
             </View>
         </SafeAreaView>
