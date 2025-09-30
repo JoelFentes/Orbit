@@ -90,7 +90,7 @@ export default function Login() {
                 />
 
                 <Text
-                    className="mt-3 font-quicksand-regular text-sm text-azul-celestial pl-1 mb-6"
+                    className="mt-3 font-quicksand-regular text-sm text-azul-celestial pl-1"
                     onPress={() => !loading && router.push("/screens/auth/reset-password")}
                 >
                     Esqueceu a senha?

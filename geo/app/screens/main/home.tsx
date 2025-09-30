@@ -18,9 +18,6 @@ export default function Home() {
         setCurrentRoute(route);
 
         switch (route) {
-            case "add":
-                router.push("/screens/main/addRemider");
-                break;
             case "calendar":
             case "add":
                 router.push("/screens/main/calendar");

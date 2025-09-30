@@ -31,6 +31,7 @@ export default function Profile() {
     }
   };
 
+<<<<<<< HEAD
   const handleLogout = async () => {
     await logout();
     router.replace("/screens/auth/login");
@@ -87,3 +88,9 @@ export default function Profile() {
     </SafeAreaView>
   );
 }
+=======
+    return (
+        <Button title="Sair" onPress={handleLogout} />
+    );
+};
+>>>>>>> parent of 983971b (fix: fixing estrutures of pages)
