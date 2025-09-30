@@ -22,13 +22,16 @@ export default function Home() {
                 router.push("/screens/main/addRemider");
                 break;
             case "calendar":
+            case "add":
                 router.push("/screens/main/calendar");
                 break;
             case "map":
                 router.push("/screens/main/map");
                 break;
+            case "notes":
+                router.push("/screens/main/notes")
             case "profile":
-                router.push("/screens/main/notes");
+                router.push("/screens/main/profile");
                 break;
             default:
                 break;
