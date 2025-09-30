@@ -18,7 +18,8 @@ export default function BottomNavigation({ currentRoute = "home", onNavigate }: 
     ];
 
     const handlePress = (itemId: string) => {
-        if (onNavigate && itemId !== "add") {
+        if (onNavigate) {
+            console.log("Navigating to:", itemId);
             onNavigate(itemId);
         }
     };

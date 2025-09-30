@@ -11,6 +11,8 @@ export const ProfileScreen = () => {
     };
 
     return (
-        <Button title="Sair" onPress={handleLogout} />
+        <>
+            <Button title="Sair" onPress={handleLogout} />
+        </>
     );
 };

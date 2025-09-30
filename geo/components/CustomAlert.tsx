@@ -6,7 +6,7 @@ export default function CustomAlert({ visible, onClose, onSave, onLocation }) {
     return (
         <Modal isVisible={visible} onBackdropPress={onClose}>
             <View className="bg-white rounded-2xl p-6">
-                <Text className="text-2xl font-quicksand-bold mb-4">O que deseja fazer?</Text>
+                <Text className="text-2xl font-quicksand-bold mb-4">Deseja usar GeoFencing?</Text>
 
                 <TouchableOpacity
                     className="bg-azul-celestial rounded-xl py-3 mb-3 items-center"
@@ -19,7 +19,7 @@ export default function CustomAlert({ visible, onClose, onSave, onLocation }) {
                     className="bg-azul-celeste rounded-xl py-3 mb-3 items-center"
                     onPress={onLocation}
                 >
-                    <Text className="text-white font-quicksand-bold text-base">Adicionar localização</Text>
+                    <Text className="text-white font-quicksand-bold text-base">Adicionar localização ao lembrete</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
