@@ -17,9 +17,6 @@ export default function Home() {
     const handleNavigation = (route: string) => {
         setCurrentRoute(route);
         switch (route) {
-            case "add":
-                router.push("/screens/main/addRemider");
-                break;
             case "calendar":
                 router.push("/screens/main/calendar");
                 break;
