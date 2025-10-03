@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
+import { router } from 'expo-router';
 
 // Interface do payload do JWT (ajuste conforme seu backend)
 interface DecodedToken {
   sub: string;
   name: string;
   email: string;
-  exp?: number; 
+  exp?: number;
 }
 
 // Interface do usuário que vamos guardar
@@ -52,6 +53,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadToken();
   }, []);
 
+  useEffect(() => {
+    async function checkToken() {
+      const token = await SecureStore.getItemAsync("userToken");
+      if (token) {
+        await login(token);
+        router.replace("../main/home");
+      }
+    }
+    checkToken();
+  }, []);
+
+
   const decodeAndSetUser = (token: string) => {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
@@ -85,28 +98,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-const login = async (token: string, userFromApi?: any): Promise<void> => {
-  try {
-    console.log('Salvando token no SecureStore...');
-    await SecureStore.setItemAsync('userToken', token);
-    setUserToken(token);
+  const login = async (token: string, userFromApi?: any): Promise<void> => {
+    try {
+      console.log('Salvando token no SecureStore...');
+      await SecureStore.setItemAsync('userToken', token);
+      setUserToken(token);
 
-    if (userFromApi) {
-      setUser({
-        id: userFromApi.id,
-        name: userFromApi.name,  
-        email: userFromApi.email,
-      });
-    } else {
-      decodeAndSetUser(token);
+      if (userFromApi) {
+        setUser({
+          id: userFromApi.id,
+          name: userFromApi.name,
+          email: userFromApi.email,
+        });
+      } else {
+        decodeAndSetUser(token);
+      }
+
+      console.log('Token salvo e usuário carregado!');
+    } catch (error) {
+      console.error('Erro ao salvar token:', error);
+      throw error;
     }
-
-    console.log('Token salvo e usuário carregado!');
-  } catch (error) {
-    console.error('Erro ao salvar token:', error);
-    throw error;
-  }
-};
+  };
 
 
   const logout = async (): Promise<void> => {

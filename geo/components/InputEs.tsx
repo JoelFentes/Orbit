@@ -21,7 +21,7 @@ export default function InputEs({
     return (
         <View className={`w-full mb-4 ${className}`}>
             {label && (
-                <Text className="font-quicksand-regular text-base mb-2 text-start">
+                <Text className="font-quicksand-regular text-base mb-2 text-start dark:text-texto-claro-principal">
                     {label}
                 </Text>
             )

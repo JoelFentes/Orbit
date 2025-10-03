@@ -11,6 +11,7 @@ import {
 import '../global.css'
 import { AuthProvider } from "@/contexts/AuthContext";
 
+
 export default function Layout() {
   const [fontsLoaded] = useFonts({
     Quicksand_300Light,

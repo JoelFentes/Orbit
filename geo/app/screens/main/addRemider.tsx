@@ -1,4 +1,3 @@
-
 import BottomNavigation from "@/components/BottomNavigation";
 import ButtonEs from "@/components/ButtonEs";
 import CustomAlert from "@/components/CustomAlert";
@@ -7,10 +6,9 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Platform, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 
 // Configurações de localização para português
 LocaleConfig.locales["pt-br"] = {
@@ -34,7 +32,8 @@ LocaleConfig.defaultLocale = "pt-br";
 
 export default function AddReminder() {
     const { user } = useAuth();
-
+    const theme = useColorScheme(); // light | dark
+    const isDark = theme === "dark";
 
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [currentRoute, setCurrentRoute] = useState("calendar");
@@ -51,7 +50,6 @@ export default function AddReminder() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
 
-
     const salvarLembrete = async () => {
         if (!user) {
             console.error("❌ Nenhum usuário autenticado");
@@ -59,11 +57,9 @@ export default function AddReminder() {
         }
 
         try {
-            const response = await fetch("https://geofencing-backend-2kse.onrender.com/api/reminders", {
+            const response = await fetch("https://geofencing-api.onrender.com/api/reminders", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title,
                     description,
@@ -86,7 +82,6 @@ export default function AddReminder() {
             console.error("Erro na requisição:", error);
         }
     };
-
 
     const handleNavigation = (route: string) => {
         setCurrentRoute(route);
@@ -116,15 +111,12 @@ export default function AddReminder() {
             .padStart(2, "0")}`;
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-100">
-            <View className="flex-1 p-7 bg-slate-100">
+        <SafeAreaView className={`flex-1 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}>
+            <View className={`flex-1 p-7 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}>
                 <View className="flex-row justify-between items-center mt-6">
-                    <Text className="text-2xl font-quicksand-bold ">
+                    <Text className={`text-2xl font-quicksand-bold ${isDark ? "text-white" : "text-black"}`}>
                         Adicione um lembrete
                     </Text>
-                    <TouchableOpacity>
-                        <Ionicons name="menu" size={24} color="gray" />
-                    </TouchableOpacity>
                 </View>
 
                 {/* Campo título */}
@@ -132,8 +124,9 @@ export default function AddReminder() {
                     value={title}
                     onChangeText={setTitle}
                     placeholder="Título do lembrete"
-                    className="w-full h-12 px-4 mt-6 bg-white border border-gray-300 rounded-xl font-quicksand-semibold text-base text-gray-700"
-                    placeholderTextColor="#9ca3af"
+                    className={`w-full h-12 px-4 mt-6 rounded-xl font-quicksand-semibold text-base 
+        ${isDark ? "bg-fundo-escuro-principal border border-gray-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                    placeholderTextColor={isDark ? "#9ca3af" : "#9ca3af"}
                 />
 
                 {/* Campo descrição */}
@@ -141,61 +134,62 @@ export default function AddReminder() {
                     value={description}
                     onChangeText={setDescription}
                     placeholder="Descrição do lembrete"
-                    className="w-full h-16 px-4 mt-4 bg-white border border-gray-300 rounded-xl font-quicksand text-base text-gray-700"
-                    placeholderTextColor="#9ca3af"
+                    className={`w-full h-16 px-4 mt-4 rounded-xl font-quicksand text-base 
+        ${isDark ? "bg-fundo-escuro-principal border border-gray-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                    placeholderTextColor={isDark ? "#9ca3af" : "#9ca3af"}
                     multiline
                 />
 
-                <Text className="text-base font-quicksand-semibold mt-6 mb-2 text-gray-600">
+                <Text className={`text-base font-quicksand-semibold mt-6 mb-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
                     Selecione o Dia & Hora
                 </Text>
-
                 <Calendar
                     onDayPress={(dia) => setSelectedDate(dia.dateString)}
                     markedDates={{
                         [selectedDate]: {
                             selected: true,
-                            selectedColor: "#78c0e0ff",
+                            selectedColor: isDark ? "#78c0e0ff" : "#78c0e0ff",
                             selectedTextColor: "white",
                         },
                     }}
                     theme={{
-                        backgroundColor: "#f8f8f8",
-                        calendarBackground: "#ffffff",
-                        textSectionTitleColor: "#374151",
-                        todayTextColor: "#3943b7ff",
-                        dayTextColor: "#111827",
-                        monthTextColor: "#111827",
-                        arrowColor: "#202020",
+                        backgroundColor: isDark ? "#202020" : "#f8f8f8", // fundo geral
+                        calendarBackground: isDark ? "#202020" : "#ffffff", // fundo do calendário
+                        textSectionTitleColor: isDark ? "#9ca3af" : "#374151",
+                        todayTextColor: isDark ? "#60a5fa" : "#3943b7ff",
+                        dayTextColor: isDark ? "#f3f4f6" : "#111827",
+                        monthTextColor: isDark ? "#f3f4f6" : "#111827",
+                        arrowColor: isDark ? "#e5e7eb" : "#202020",
                         textDayFontWeight: "light",
                         textMonthFontWeight: "light",
                         textDayFontSize: 16,
                         textMonthFontSize: 18,
                     }}
                 />
+
             </View>
 
-            <View className="flex-row justify-around items-center mt-4 mb-6">
+            <View className="flex-row justify-around items-center mb-10">
                 {/* Hora de Início */}
                 <TouchableOpacity
-                    className="w-[40%] h-14 ml-3 bg-white justify-center items-center rounded-xl border border-gray-300 flex-row"
+                    className={`w-[40%] h-14 ml-3 justify-center items-center rounded-xl border flex-row
+    ${isDark ? "bg-fundo-escuro-principal border-gray-600" : "bg-white border-gray-300"}`}
                     onPress={() => setShowStartPicker(true)}
                 >
-                    <Ionicons className="mt-[2px]" name="time-outline" size={20} color="black" />
-                    <Text className="text-lg ml-2 font-quicksand-semibold text-gray-700">
+                    <Ionicons name="time-outline" size={20} color={isDark ? "white" : "black"} />
+                    <Text className={`text-lg ml-2 font-quicksand-semibold ${isDark ? "text-white" : "text-gray-700"}`}>
                         {formatTime(startTime)}
                     </Text>
                 </TouchableOpacity>
 
-                <Text>-</Text>
-
                 {/* Hora de Fim */}
                 <TouchableOpacity
-                    className="w-[40%] h-14 mr-3 bg-white justify-center items-center rounded-xl border border-gray-300 flex-row"
+                    className={`w-[40%] h-14 mr-3 justify-center items-center rounded-xl border flex-row
+    ${isDark ? "bg-fundo-escuro-principal border-gray-600" : "bg-white border-gray-300"}`}
                     onPress={() => setShowEndPicker(true)}
                 >
-                    <Ionicons className="mt-[2px]" name="time-outline" size={20} color="black" />
-                    <Text className="text-lg ml-2 font-quicksand-semibold text-gray-700">
+                    <Ionicons name="time-outline" size={20} color={isDark ? "white" : "black"} />
+                    <Text className={`text-lg ml-2 font-quicksand-semibold ${isDark ? "text-white" : "text-gray-700"}`}>
                         {formatTime(endTime)}
                     </Text>
                 </TouchableOpacity>
@@ -229,7 +223,7 @@ export default function AddReminder() {
                 />
             )}
 
-            <View className="flex-row justify-around mb-12">
+            <View className="flex-row justify-around mb-14">
                 <ButtonEs
                     title="Salvar lembrete"
                     onPress={() => setAlertVisible(true)}

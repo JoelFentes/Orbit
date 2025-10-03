@@ -2,11 +2,18 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";
 
-export default function CustomAlert({ visible, onClose, onSave, onLocation }) {
+type CustomAlertProps = {
+    visible: boolean;
+    onClose: () => void;
+    onSave: () => void;
+    onLocation: () => void;
+};
+
+export default function CustomAlert({ visible, onClose, onSave, onLocation }: CustomAlertProps) {
     return (
         <Modal isVisible={visible} onBackdropPress={onClose}>
-            <View className="bg-white rounded-2xl p-6">
-                <Text className="text-2xl font-quicksand-bold mb-4">Deseja usar GeoFencing?</Text>
+            <View className="bg-white dark:bg-fundo-escuro-principal rounded-2xl p-6">
+                <Text className="text-2xl dark:text-texto-claro-principal font-quicksand-bold mb-4">Deseja usar GeoFencing?</Text>
 
                 <TouchableOpacity
                     className="bg-azul-celestial rounded-xl py-3 mb-3 items-center"
@@ -23,10 +30,10 @@ export default function CustomAlert({ visible, onClose, onSave, onLocation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    className="bg-gray-300 rounded-xl py-3 items-center"
+                    className="bg-gray-100 rounded-xl py-3 items-center"
                     onPress={onClose}
                 >
-                    <Text className="text-gray-700 font-quicksand-bold text-base">Cancelar</Text>
+                    <Text className="text-black font-quicksand-bold text-base">Cancelar</Text>
                 </TouchableOpacity>
             </View>
         </Modal>
