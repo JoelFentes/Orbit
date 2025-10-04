@@ -18,12 +18,9 @@ export default function BottomNavigation({ currentRoute = "home", onNavigate }: 
     ];
 
     const handlePress = (itemId: string) => {
-<<<<<<< HEAD
         if (onNavigate) {
-=======
-        if (onNavigate && itemId !== "add") {
->>>>>>> parent of 983971b (fix: fixing estrutures of pages)
             onNavigate(itemId);
+            console.log("Navigating to:", itemId);
         }
     };
 

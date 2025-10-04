@@ -1,14 +1,12 @@
+// GeofencingScreen.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Button, Alert, ScrollView, TouchableOpacity } from 'react-native';
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import * as Location from 'expo-location';
-import { useColorScheme } from 'nativewind';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import { useColorScheme } from "nativewind";
 import GeofenceMap from '@/components/GeofencingMap';
-
-// 👉 Substituir pela sua chave do Google Maps
-const GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY";
 
 // Categorias comuns do Google Places
 const Categorias = [
@@ -28,19 +26,25 @@ export default function GeofencingScreen() {
     const scrollRef = useRef<ScrollView>(null);
     const [scrollX, setScrollX] = useState(0);
     const scrollAmount = 150;
-    const mapRef = useRef<MapView>(null);
+
+    const mapRef = useRef(null);
     const [region, setRegion] = useState({
         latitude: -8.056,
         longitude: -34.9,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
     });
+
     const [userLocation, setUserLocation] = useState(null);
     const [geofenceCenter, setGeofenceCenter] = useState(null);
     const [radiusMeters, setRadiusMeters] = useState(300);
     const [places, setPlaces] = useState([]);
     const [categoryType, setCategoryType] = useState("pharmacy");
 
+    const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === "dark";
+
+    // Pega localização do usuário
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -52,18 +56,12 @@ export default function GeofencingScreen() {
             const { latitude, longitude } = loc.coords;
             setUserLocation({ latitude, longitude });
             setRegion(r => ({ ...r, latitude, longitude }));
-            if (mapRef.current) {
-                mapRef.current.animateToRegion(
-                    { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 },
-                    500
-                );
-            }
         })();
     }, []);
 
     return (
         <View className="flex-1">
-            {/* 🗺️ Mapa absoluto */}
+            {/* 🗺️ Mapa em background absoluto */}
             <GeofenceMap
                 ref={mapRef}
                 region={region}
@@ -73,19 +71,39 @@ export default function GeofencingScreen() {
                 onLongPress={(coords) => setGeofenceCenter(coords)}
             />
 
-            {/* Conteúdo sobreposto */}
-            <View className="absolute inset-0 p-2">
-                {/* Input de busca */}
-                <View className="flex-row items-center mb-2 bg-white/80 rounded-lg p-1">
-                    <TextInput
-                        placeholder="Buscar local"
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2 bg-white"
-                    />
-                    <Button title="Buscar" onPress={() => { }} />
+            {/* UI sobreposta no rodapé */}
+            <View className="absolute bottom-0 left-0 right-0 p-3 space-y-3">
+
+                {/* 📏 Botões flutuantes para raio */}
+                <View className="absolute bottom-28 right-5 p-2 gap-3">
+                    {/* Diminuir raio */}
+                    <TouchableOpacity
+                        onPress={() => setRadiusMeters(Math.max(radiusMeters - 100, 100))}
+                        className="w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario/20"
+                    >
+                        <Ionicons
+                            name="remove-outline"
+                            size={24}
+                            color={isDark ? "white" : "black"}
+                        />
+                    </TouchableOpacity>
+
+                    {/* Aumentar raio */}
+                    <TouchableOpacity
+                        onPress={() => setRadiusMeters(radiusMeters + 100)}
+                        className="w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario/20"
+                    >
+                        <Ionicons
+                            name="add-outline"
+                            size={24}
+                            color={isDark ? "white" : "black"}
+                        />
+                    </TouchableOpacity>
                 </View>
 
+
                 {/* 🎯 Carrossel de categorias */}
-                <View className="flex-row items-center mb-2">
+                <View className="flex-row items-center bg-white/90 rounded-lg p-2">
                     {scrollX > 0 && (
                         <TouchableOpacity
                             className="px-2"
@@ -111,7 +129,7 @@ export default function GeofencingScreen() {
                         {Categorias.map(cat => (
                             <TouchableOpacity
                                 key={cat.name}
-                                onPress={() => handleSearchCategory(cat.name)}
+                                onPress={() => setCategoryType(cat.name)}
                                 className={`px-3 py-2 mx-1 rounded-full flex-row items-center border ${categoryType === cat.name
                                     ? "bg-blue-500 border-blue-500"
                                     : "bg-gray-200 border-gray-300"
@@ -143,16 +161,13 @@ export default function GeofencingScreen() {
                     )}
                 </View>
 
-                {/* 📏 Input do raio */}
-                <View className="flex-row items-center mt-3 bg-white/80 rounded-lg p-1">
+                {/* Input de busca */}
+                <View className="flex-row items-center bg-white/90 rounded-lg p-2">
                     <TextInput
-                        placeholder="Raio em metros"
-                        keyboardType="numeric"
-                        value={String(radiusMeters)}
-                        onChangeText={t => setRadiusMeters(Number(t) || 0)}
+                        placeholder="Buscar local"
                         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2 bg-white"
                     />
-                    <Button title="Aplicar" onPress={() => Alert.alert("Raio atualizado", `${radiusMeters}m`)} />
+                    <Button title="Buscar" onPress={() => { }} />
                 </View>
             </View>
         </View>

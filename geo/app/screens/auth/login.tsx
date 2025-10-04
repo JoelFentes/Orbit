@@ -87,13 +87,6 @@ export default function Login() {
                     </Text>
                 </View>
 
-                <Text
-                    className="mt-3 font-quicksand-regular text-sm text-azul-celestial pl-1"
-                    onPress={() => !loading && router.push("/screens/auth/reset-password")}
-                >
-                    Esqueceu a senha?
-                </Text>
-
                 {loading ? (
                     <View className="mt-12 bg-azul-celeste rounded-lg h-12 items-center justify-center">
                         <ActivityIndicator color="white" size="small" />
