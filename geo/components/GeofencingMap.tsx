@@ -26,9 +26,12 @@ const GeofenceMap = forwardRef<MapView, GeofenceMapProps>(
                 provider={PROVIDER_GOOGLE}
                 initialRegion={region}
                 showsUserLocation
-                onRegionChangeComplete={() => { }}
+                showsMyLocationButton={false} 
+                onRegionChangeComplete={() => {}}
                 onLongPress={e => onLongPress && onLongPress(e.nativeEvent.coordinate)}
-                style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
+                style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
+            >
+
 
                 {/* 🔵 Círculo da geofence */}
                 {geofenceCenter && (

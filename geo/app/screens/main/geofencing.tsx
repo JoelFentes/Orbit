@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Button, Alert, ScrollView, TouchableOpacity } from 'react-native';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import * as Location from 'expo-location';
+
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -45,22 +46,26 @@ export default function GeofencingScreen() {
     const isDark = colorScheme === "dark";
 
     // Pega localização do usuário
-    useEffect(() => {
-        (async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== "granted") {
-                Alert.alert("Permissão negada", "É necessário liberar localização.");
-                return;
-            }
-            let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-            const { latitude, longitude } = loc.coords;
-            setUserLocation({ latitude, longitude });
-            setRegion(r => ({ ...r, latitude, longitude }));
-        })();
+   useEffect(() => {
+    (async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+        Alert.alert("Permissão negada", "É necessário liberar localização.");
+        return;
+        }
+        let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+        const { latitude, longitude } = loc.coords;
+        setUserLocation({ latitude, longitude });
+        setRegion(r => ({ ...r, latitude, longitude }));
+
+        // 🔴 Aqui seta o centro da geofence na posição inicial
+        setGeofenceCenter({ latitude, longitude });
+    })();
     }, []);
 
+
     return (
-        <View className="flex-1">
+        <View className="flex-1 items-center ">
             {/* 🗺️ Mapa em background absoluto */}
             <GeofenceMap
                 ref={mapRef}
@@ -71,39 +76,38 @@ export default function GeofencingScreen() {
                 onLongPress={(coords) => setGeofenceCenter(coords)}
             />
 
-            {/* UI sobreposta no rodapé */}
-            <View className="absolute bottom-0 left-0 right-0 p-3 space-y-3">
+            <View className="w-[95%] relative top-8">
+                {/* Ícone de busca posicionado à esquerda dentro do input */}
+                <FontAwesome5
+                    name="search"
+                    size={14}
+                    color="gray"
+                    style={{
+                    position: 'absolute',
+                    left: 10,
+                    top: '50%',
+                    transform: [{ translateY: -8 }], 
+                    zIndex: 1,
+                    }}
+                />
 
-                {/* 📏 Botões flutuantes para raio */}
-                <View className="absolute bottom-28 right-5 p-2 gap-3">
-                    {/* Diminuir raio */}
-                    <TouchableOpacity
-                        onPress={() => setRadiusMeters(Math.max(radiusMeters - 100, 100))}
-                        className="w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario/20"
-                    >
-                        <Ionicons
-                            name="remove-outline"
-                            size={24}
-                            color={isDark ? "white" : "black"}
-                        />
-                    </TouchableOpacity>
-
-                    {/* Aumentar raio */}
-                    <TouchableOpacity
-                        onPress={() => setRadiusMeters(radiusMeters + 100)}
-                        className="w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario/20"
-                    >
-                        <Ionicons
-                            name="add-outline"
-                            size={24}
-                            color={isDark ? "white" : "black"}
-                        />
-                    </TouchableOpacity>
-                </View>
+                {/* Input */}
+                <TextInput
+                    placeholder="Buscar local"
+                    className="w-full pl-10 pr-3 py-3 rounded-lg bg-white "
+                    onChangeText={(text) => {
+                    console.log("Buscando por:", text);
+                    }}
+                    returnKeyType="search"
+                    onSubmitEditing={(e) => {
+                    console.log("Buscar:", e.nativeEvent.text);
+                    }}
+                />
+            </View>
 
 
-                {/* 🎯 Carrossel de categorias */}
-                <View className="flex-row items-center bg-white/90 rounded-lg p-2">
+             {/* 🎯 Carrossel de categorias */}
+                <View className="flex-row items-center justify-right top-10 w-[95%] bg-transparent rounded-lg p-2">
                     {scrollX > 0 && (
                         <TouchableOpacity
                             className="px-2"
@@ -123,27 +127,35 @@ export default function GeofencingScreen() {
                         ref={scrollRef}
                         showsHorizontalScrollIndicator={false}
                         onScroll={e => setScrollX(e.nativeEvent.contentOffset.x)}
-                        scrollEventThrottle={16}
+                        scrollEventThrottle={14}
                         className="flex-1"
                     >
-                        {Categorias.map(cat => (
-                            <TouchableOpacity
-                                key={cat.name}
-                                onPress={() => setCategoryType(cat.name)}
-                                className={`px-3 py-2 mx-1 rounded-full flex-row items-center border ${categoryType === cat.name
-                                    ? "bg-blue-500 border-blue-500"
-                                    : "bg-gray-200 border-gray-300"
+                       {Categorias.map(cat => {
+                            const isSelected = categoryType === cat.name;
+
+                            // Clona o ícone e aplica cor dinamicamente
+                            const Icon = React.cloneElement(cat.icon, {
+                                color: isSelected ? "white" : "black",
+                            });
+
+                            return (
+                                <TouchableOpacity
+                                    key={cat.name}
+                                    onPress={() => setCategoryType(cat.name)}
+                                    className={`px-3 py-2 mx-1 rounded-full flex-row items-center border ${
+                                        isSelected ? "bg-blue-500 border-blue-500" : "bg-white border-white"
                                     }`}
-                            >
-                                <View className="mr-1">{cat.icon}</View>
-                                <Text
-                                    className={`text-sm ${categoryType === cat.name ? "text-white font-bold" : "text-gray-700"
-                                        }`}
                                 >
-                                    {cat.name}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                                    <View className="mr-1">{Icon}</View>
+                                    <Text
+                                        className={`text-sm ${isSelected ? "text-white font-bold" : "text-gray-700"}`}
+                                    >
+                                        {cat.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+
                     </ScrollView>
 
                     {scrollRef.current && scrollX + 300 < Categorias.length * 100 && (
@@ -161,14 +173,59 @@ export default function GeofencingScreen() {
                     )}
                 </View>
 
-                {/* Input de busca */}
-                <View className="flex-row items-center bg-white/90 rounded-lg p-2">
-                    <TextInput
-                        placeholder="Buscar local"
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 mr-2 bg-white"
-                    />
-                    <Button title="Buscar" onPress={() => { }} />
+                {/* 📍 Botão custom de "ir para minha localização" */}
+                <TouchableOpacity
+                onPress={() => {
+                    if (userLocation && mapRef.current) {
+                    mapRef.current.animateToRegion(
+                        {
+                        latitude: userLocation.latitude,
+                        longitude: userLocation.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                        },
+                        1000 
+                    );
+                    }
+                }}
+                className="absolute top-[10rem] right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario"
+                >
+                    <Ionicons name="locate-outline" size={26} color={isDark ? "white" : "black"} />
+                </TouchableOpacity>
+
+
+            {/* UI sobreposta no rodapé */}
+            <View className="absolute bottom-0 left-0 right-0 p-3 space-y-3">
+                {/* 📏 Botões flutuantes para raio */}
+                <View className="absolute flex-row bottom-40 right-12 p-2 gap-3">
+                    {/* Aumentar raio */}
+                    <TouchableOpacity
+                        onPress={() => setRadiusMeters(radiusMeters + 100)}
+                        className="w-14 h-14 left-10 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario"
+                    >
+                        <Ionicons
+                            name="add-outline"
+                            size={24}
+                            color={isDark ? "white" : "black"}
+                        />
+                    </TouchableOpacity>
+
+
+                    {/* Diminuir raio */}
+                    <TouchableOpacity
+                        onPress={() => setRadiusMeters(Math.max(radiusMeters - 100, 100))}
+                        className="w-14 h-14 left-10 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario"
+                    >
+                        <Ionicons
+                            name="remove-outline"
+                            size={24}
+                            color={isDark ? "white" : "black"}
+                        />
+                    </TouchableOpacity>           
                 </View>
+
+          
+            
             </View>
         </View>
     );
