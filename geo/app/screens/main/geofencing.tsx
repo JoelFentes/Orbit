@@ -8,6 +8,7 @@ import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import GeofenceMap from '@/components/GeofencingMap';
+import ButtonEs from '@/components/ButtonEs';
 
 // Categorias comuns do Google Places
 const Categorias = [
@@ -46,21 +47,21 @@ export default function GeofencingScreen() {
     const isDark = colorScheme === "dark";
 
     // Pega localização do usuário
-   useEffect(() => {
-    (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-        Alert.alert("Permissão negada", "É necessário liberar localização.");
-        return;
-        }
-        let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-        const { latitude, longitude } = loc.coords;
-        setUserLocation({ latitude, longitude });
-        setRegion(r => ({ ...r, latitude, longitude }));
+    useEffect(() => {
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== "granted") {
+                Alert.alert("Permissão negada", "É necessário liberar localização.");
+                return;
+            }
+            let loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+            const { latitude, longitude } = loc.coords;
+            setUserLocation({ latitude, longitude });
+            setRegion(r => ({ ...r, latitude, longitude }));
 
-        // 🔴 Aqui seta o centro da geofence na posição inicial
-        setGeofenceCenter({ latitude, longitude });
-    })();
+            // 🔴 Aqui seta o centro da geofence na posição inicial
+            setGeofenceCenter({ latitude, longitude });
+        })();
     }, []);
 
 
@@ -83,11 +84,11 @@ export default function GeofencingScreen() {
                     size={14}
                     color="gray"
                     style={{
-                    position: 'absolute',
-                    left: 10,
-                    top: '50%',
-                    transform: [{ translateY: -8 }], 
-                    zIndex: 1,
+                        position: 'absolute',
+                        left: 10,
+                        top: '50%',
+                        transform: [{ translateY: -8 }],
+                        zIndex: 1,
                     }}
                 />
 
@@ -96,102 +97,101 @@ export default function GeofencingScreen() {
                     placeholder="Buscar local"
                     className="w-full pl-10 pr-3 py-3 rounded-lg bg-white "
                     onChangeText={(text) => {
-                    console.log("Buscando por:", text);
+                        console.log("Buscando por:", text);
                     }}
                     returnKeyType="search"
                     onSubmitEditing={(e) => {
-                    console.log("Buscar:", e.nativeEvent.text);
+                        console.log("Buscar:", e.nativeEvent.text);
                     }}
                 />
             </View>
 
 
-             {/* 🎯 Carrossel de categorias */}
-                <View className="flex-row items-center justify-right top-10 w-[95%] bg-transparent rounded-lg p-2">
-                    {scrollX > 0 && (
-                        <TouchableOpacity
-                            className="px-2"
-                            onPress={() => {
-                                if (scrollRef.current) {
-                                    scrollRef.current.scrollTo({ x: scrollX - scrollAmount, animated: true });
-                                    setScrollX(Math.max(scrollX - scrollAmount, 0));
-                                }
-                            }}
-                        >
-                            <Fontisto name="angle-left" size={16} color="black" />
-                        </TouchableOpacity>
-                    )}
-
-                    <ScrollView
-                        horizontal
-                        ref={scrollRef}
-                        showsHorizontalScrollIndicator={false}
-                        onScroll={e => setScrollX(e.nativeEvent.contentOffset.x)}
-                        scrollEventThrottle={14}
-                        className="flex-1"
+            {/* 🎯 Carrossel de categorias */}
+            <View className="flex-row items-center justify-right top-10 w-[95%] bg-transparent rounded-lg p-2">
+                {scrollX > 0 && (
+                    <TouchableOpacity
+                        className="px-2"
+                        onPress={() => {
+                            if (scrollRef.current) {
+                                scrollRef.current.scrollTo({ x: scrollX - scrollAmount, animated: true });
+                                setScrollX(Math.max(scrollX - scrollAmount, 0));
+                            }
+                        }}
                     >
-                       {Categorias.map(cat => {
-                            const isSelected = categoryType === cat.name;
+                        <Fontisto name="angle-left" size={16} color="black" />
+                    </TouchableOpacity>
+                )}
 
-                            // Clona o ícone e aplica cor dinamicamente
-                            const Icon = React.cloneElement(cat.icon, {
-                                color: isSelected ? "white" : "black",
-                            });
+                <ScrollView
+                    horizontal
+                    ref={scrollRef}
+                    showsHorizontalScrollIndicator={false}
+                    onScroll={e => setScrollX(e.nativeEvent.contentOffset.x)}
+                    scrollEventThrottle={14}
+                    className="flex-1"
+                >
+                    {Categorias.map(cat => {
+                        const isSelected = categoryType === cat.name;
 
-                            return (
-                                <TouchableOpacity
-                                    key={cat.name}
-                                    onPress={() => setCategoryType(cat.name)}
-                                    className={`px-3 py-2 mx-1 rounded-full flex-row items-center border ${
-                                        isSelected ? "bg-blue-500 border-blue-500" : "bg-white border-white"
+                        // Clona o ícone e aplica cor dinamicamente
+                        const Icon = React.cloneElement(cat.icon, {
+                            color: isSelected ? "white" : "black",
+                        });
+
+                        return (
+                            <TouchableOpacity
+                                key={cat.name}
+                                onPress={() => setCategoryType(cat.name)}
+                                className={`px-3 py-2 mx-1 rounded-full flex-row items-center border ${isSelected ? "bg-blue-500 border-blue-500" : "bg-white border-white"
                                     }`}
+                            >
+                                <View className="mr-1">{Icon}</View>
+                                <Text
+                                    className={`text-sm ${isSelected ? "text-white font-bold" : "text-gray-700"}`}
                                 >
-                                    <View className="mr-1">{Icon}</View>
-                                    <Text
-                                        className={`text-sm ${isSelected ? "text-white font-bold" : "text-gray-700"}`}
-                                    >
-                                        {cat.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            );
-                        })}
+                                    {cat.name}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
 
-                    </ScrollView>
+                </ScrollView>
 
-                    {scrollRef.current && scrollX + 300 < Categorias.length * 100 && (
-                        <TouchableOpacity
-                            className="px-2"
-                            onPress={() => {
-                                if (scrollRef.current) {
-                                    scrollRef.current.scrollTo({ x: scrollX + scrollAmount, animated: true });
-                                    setScrollX(scrollX + scrollAmount);
-                                }
-                            }}
-                        >
-                            <Fontisto name="angle-right" size={16} color="black" />
-                        </TouchableOpacity>
-                    )}
-                </View>
+                {scrollRef.current && scrollX + 300 < Categorias.length * 100 && (
+                    <TouchableOpacity
+                        className="px-2"
+                        onPress={() => {
+                            if (scrollRef.current) {
+                                scrollRef.current.scrollTo({ x: scrollX + scrollAmount, animated: true });
+                                setScrollX(scrollX + scrollAmount);
+                            }
+                        }}
+                    >
+                        <Fontisto name="angle-right" size={16} color="black" />
+                    </TouchableOpacity>
+                )}
+            </View>
 
-                {/* 📍 Botão custom de "ir para minha localização" */}
-                <TouchableOpacity
+            {/* 📍 Botão custom de "ir para minha localização" */}
+            <TouchableOpacity
                 onPress={() => {
                     if (userLocation && mapRef.current) {
-                    mapRef.current.animateToRegion(
-                        {
-                        latitude: userLocation.latitude,
-                        longitude: userLocation.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                        },
-                        1000 
-                    );
+                        mapRef.current.animateToRegion(
+                            {
+                                latitude: userLocation.latitude,
+                                longitude: userLocation.longitude,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                            },
+                            1000
+                        );
                     }
                 }}
                 className="absolute top-[10rem] right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario"
-                >
-                    <Ionicons name="locate-outline" size={26} color={isDark ? "white" : "black"} />
-                </TouchableOpacity>
+            >
+                <Ionicons name="locate-outline" size={26} color={isDark ? "white" : "black"} />
+            </TouchableOpacity>
 
 
             {/* UI sobreposta no rodapé */}
@@ -221,11 +221,11 @@ export default function GeofencingScreen() {
                             size={24}
                             color={isDark ? "white" : "black"}
                         />
-                    </TouchableOpacity>           
+                    </TouchableOpacity>
                 </View>
 
-          
-            
+
+
             </View>
         </View>
     );
