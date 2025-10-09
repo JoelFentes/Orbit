@@ -12,7 +12,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "nativewind-env.d.ts"
-, "contexts/AuthContext.tsx"  ]
+    "nativewind-env.d.ts",
+    "contexts/AuthContext.tsx",
+    "expo-env.d.ts"
+  ]
 }
