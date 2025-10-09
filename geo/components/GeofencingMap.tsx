@@ -22,13 +22,12 @@ const GeofenceMap = forwardRef<MapView, GeofenceMapProps>(
                 ref={ref}
                 provider={PROVIDER_GOOGLE}
                 initialRegion={region}
-                showsUserLocation
+                showsUserLocation={false}
                 showsMyLocationButton={false}
                 onLongPress={e => onLongPress && onLongPress(e.nativeEvent.coordinate)}
                 style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}
             >
                 {places.map((p, index) => {
-                    // Ignora marker se for a localização do usuário
                     if (
                         userLocation &&
                         p.location.latitude === userLocation.latitude &&

@@ -6,6 +6,7 @@ import { useColorScheme } from "nativewind";
 import GeofenceMap, { Place } from '@/components/GeofencingMap';
 import PlaceAutocomplete from '@/components/PlaceAutocomplete';
 import CategoryCarousel from '@/components/CategoryCarousel';
+import GeofencingTutorial from "@/components/GeofencingTutorial";
 
 type LatLng = { latitude: number; longitude: number } | null;
 
@@ -23,6 +24,8 @@ export default function GeofencingScreen() {
     const [places, setPlaces] = useState<Place[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [customPoint, setCustomPoint] = useState<LatLng>(null);
+
+    const [showTutorial, setShowTutorial] = useState(false);
 
     const { colorScheme } = useColorScheme();
     const isDark = colorScheme === "dark";
@@ -45,6 +48,7 @@ export default function GeofencingScreen() {
 
     return (
         <View className="flex-1 items-center">
+
             {/* Mapa */}
             <GeofenceMap
                 ref={mapRef}
@@ -55,6 +59,20 @@ export default function GeofencingScreen() {
                     setCustomPoint(coords);
                     setSelectedCategory(null); // desativa categoria ao selecionar ponto manual
                 }}
+            />
+
+            {/* Botão de ajuda (tutorial) */}
+            <TouchableOpacity
+                onPress={() => setShowTutorial(true)}
+                className="absolute top-[10rem] left-5 w-14 h-14 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario"
+            >
+                <Ionicons name="help-outline" size={26} color={isDark ? "white" : "black"} />
+            </TouchableOpacity>
+
+            {/* Tutorial modal */}
+            <GeofencingTutorial
+                visible={showTutorial}
+                onClose={() => setShowTutorial(false)}
             />
 
             {/* Autocomplete */}
@@ -118,6 +136,8 @@ export default function GeofencingScreen() {
                     <Ionicons name="remove-outline" size={24} color={isDark ? "white" : "black"} />
                 </TouchableOpacity>
             </View>
+
+
         </View>
     );
 }
