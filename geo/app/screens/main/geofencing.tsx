@@ -7,6 +7,7 @@ import GeofenceMap, { Place } from '@/components/GeofencingMap';
 import PlaceAutocomplete from '@/components/PlaceAutocomplete';
 import CategoryCarousel from '@/components/CategoryCarousel';
 import GeofencingTutorial from "@/components/GeofencingTutorial";
+import ButtonEs from '@/components/ButtonEs';
 
 type LatLng = { latitude: number; longitude: number } | null;
 
@@ -83,7 +84,7 @@ export default function GeofencingScreen() {
                     onPlaceSelected={(description, location) => {
                         if (location) {
                             setCustomPoint(location);
-                            setSelectedCategory(null); // desativa categoria
+                            setSelectedCategory(null); 
                             mapRef.current?.animateToRegion({
                                 latitude: location.latitude,
                                 longitude: location.longitude,
@@ -123,7 +124,7 @@ export default function GeofencingScreen() {
             {/* Botões de aumentar/diminuir raio */}
             <View className="absolute flex-row bottom-40 right-12 p-2 gap-3">
                 <TouchableOpacity
-                    onPress={() => setRadiusMeters(radiusMeters + 100)}
+                    onPress={() => setRadiusMeters(radiusMeters + 50)}
                     className="w-14 h-14 left-10 rounded-full items-center justify-center shadow-lg bg-white dark:bg-acento-primario"
                 >
                     <Ionicons name="add-outline" size={24} color={isDark ? "white" : "black"} />
@@ -137,7 +138,18 @@ export default function GeofencingScreen() {
                 </TouchableOpacity>
             </View>
 
-
+           <ButtonEs
+title='Adicionar Localização' className='absolute bottom-16 w-[90%] items-center rounded py-4 bg-acento-primario' onPress={() => {
+                   if (customPoint) { // Verifique se há um ponto personalizado/selecionado
+                       Alert.alert(
+                           "Localização Adicionada",
+                           `Localização adicionada em:\nLat: ${customPoint.latitude.toFixed(5)}, Lon: ${customPoint.longitude.toFixed(5)}`
+                       );
+                   } else {
+                       Alert.alert("Erro", "Nenhuma localização selecionada.");
+                   }
+               }}>
+</ButtonEs>
         </View>
     );
 }

@@ -66,14 +66,14 @@ export default function GeofencingTutorial({ visible, onClose }: Props) {
             {/* Fundo escurecido */}
             <View className="flex-1 bg-black/50 items-center justify-center">
                 {/* Conteúdo do popup */}
-                <View className="w-[85%] max-w-[380px] bg-white dark:bg-fundo-escuro-principal rounded-3xl p-6 items-center shadow-2xl">
+                <View className="w-[85%] max-w-[26rem] bg-white dark:bg-fundo-escuro-principal rounded-3xl p-6 items-center shadow-2xl">
 
                     {/* Botão Fechar */}
                     <TouchableOpacity
                         onPress={onClose}
                         className="absolute top-4 right-4 bg-gray-200 dark:bg-neutral-700 p-2 rounded-full"
                     >
-                        <Ionicons name="close" size={20} color="#000" />
+                        <Ionicons name="close" size={20} color="#ffff" />
                     </TouchableOpacity>
 
                     {/* Conteúdo do slide */}
@@ -95,9 +95,9 @@ export default function GeofencingTutorial({ visible, onClose }: Props) {
                             >
                                 <Ionicons
                                     name={item.icon as any}
-                                    size={60}
-                                    color="#007AFF"
-                                    style={{ marginBottom: 20 }}
+                                    size={90}
+                                    color="#66b8f5ff"
+                                    style={{ marginBottom: 20, right: 10 }}
                                 />
                                 <Text className="font-quicksand-bold dark:text-texto-claro-principal text-xl text-center mb-2">
                                     {item.title}
