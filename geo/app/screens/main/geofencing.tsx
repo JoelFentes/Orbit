@@ -139,17 +139,17 @@ export default function GeofencingScreen() {
             </View>
 
            <ButtonEs
-title='Adicionar Localização' className='absolute bottom-16 w-[90%] items-center rounded py-4 bg-acento-primario' onPress={() => {
-                   if (customPoint) { // Verifique se há um ponto personalizado/selecionado
-                       Alert.alert(
-                           "Localização Adicionada",
-                           `Localização adicionada em:\nLat: ${customPoint.latitude.toFixed(5)}, Lon: ${customPoint.longitude.toFixed(5)}`
-                       );
-                   } else {
-                       Alert.alert("Erro", "Nenhuma localização selecionada.");
-                   }
-               }}>
-</ButtonEs>
+            title='Adicionar Localização' className='absolute bottom-16 w-[90%] items-center rounded py-4 bg-acento-primario' onPress={() => {
+                            if (customPoint) { // Verifique se há um ponto personalizado/selecionado
+                                Alert.alert(
+                                    "Localização Adicionada",
+                                    `Localização adicionada em:\nLat: ${customPoint.latitude.toFixed(5)}, Lon: ${customPoint.longitude.toFixed(5)}`
+                                );
+                            } else {
+                                Alert.alert("Erro", "Nenhuma localização selecionada.");
+                            }
+                        }}>
+            </ButtonEs>
         </View>
     );
 }
