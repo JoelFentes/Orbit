@@ -2,13 +2,25 @@ import BottomNavigation from "@/components/BottomNavigation";
 import ButtonEs from "@/components/ButtonEs";
 import CustomAlert from "@/components/CustomAlert";
 import { useAuth } from "@/contexts/AuthContext";
+import CustomCalendar from "@/components/CustomCalendar";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Platform, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import {
+    Modal,
+    Platform,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    useColorScheme,
+} from "react-native";
+// A importação do 'Calendar' é usada pelo 'LocaleConfig'
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
+import TimePickerDropdown from "@/components/CustomTimePickerDropdown";
+import CustomTimePickerDropdown from "@/components/CustomTimePickerDropdown";
 
 // Configurações de localização para português
 LocaleConfig.locales["pt-br"] = {
@@ -27,7 +39,6 @@ LocaleConfig.locales["pt-br"] = {
     dayNamesShort: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
     today: "Hoje"
 };
-
 LocaleConfig.defaultLocale = "pt-br";
 
 export default function AddReminder() {
@@ -43,12 +54,9 @@ export default function AddReminder() {
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
 
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
-
-    // Campos de título e descrição
+    // Campo de título
     const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
+    const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
     const salvarLembrete = async () => {
         if (!user) {
@@ -57,18 +65,21 @@ export default function AddReminder() {
         }
 
         try {
-            const response = await fetch("https://geofencing-api.onrender.com/api/reminders", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    title,
-                    description,
-                    date: selectedDate,
-                    startTime,
-                    endTime,
-                    userId: user.id
-                }),
-            });
+            const response = await fetch(
+                "https://geofencing-api.onrender.com/api/reminders",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        title,
+                        // description, // Você referencia 'description' aqui, mas não há estado para ele.
+                        date: selectedDate,
+                        startTime,
+                        endTime,
+                        userId: user.id,
+                    }),
+                }
+            );
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -111,10 +122,17 @@ export default function AddReminder() {
             .padStart(2, "0")}`;
 
     return (
-        <SafeAreaView className={`flex-1 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}>
-            <View className={`flex-1 p-7 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}>
+        <SafeAreaView
+            className={`flex-1 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}
+        >
+            <View
+                className={`flex-1 p-7 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}
+            >
                 <View className="flex-row justify-between items-center mt-6">
-                    <Text className={`text-2xl font-quicksand-bold ${isDark ? "text-white" : "text-black"}`}>
+                    <Text
+                        className={`text-2xl font-quicksand-bold ${isDark ? "text-white" : "text-black"
+                            }`}
+                    >
                         Adicione um lembrete
                     </Text>
                 </View>
@@ -123,106 +141,59 @@ export default function AddReminder() {
                 <TextInput
                     value={title}
                     onChangeText={setTitle}
-                    placeholder="Título do lembrete"
-                    className={`w-full h-12 px-4 mt-6 rounded-xl font-quicksand-semibold text-base 
-        ${isDark ? "bg-fundo-escuro-principal border border-gray-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
+                    placeholder="Título"
+                    className={`w-full h-12 px-4 mt-6 rounded-xl font-quicksand-semibold text-lg 
+    ${isDark ? "bg-fundo-escuro-principal border border-gray-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
                     placeholderTextColor={isDark ? "#9ca3af" : "#9ca3af"}
                 />
 
-                {/* Campo descrição */}
-                <TextInput
-                    value={description}
-                    onChangeText={setDescription}
-                    placeholder="Descrição do lembrete"
-                    className={`w-full h-16 px-4 mt-4 rounded-xl font-quicksand text-base 
-        ${isDark ? "bg-fundo-escuro-principal border border-gray-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
-                    placeholderTextColor={isDark ? "#9ca3af" : "#9ca3af"}
-                    multiline
-                />
-
-                <Text className={`text-base font-quicksand-semibold mt-6 mb-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-                    Selecione o Dia & Hora
-                </Text>
-                <Calendar
-                    onDayPress={(dia) => setSelectedDate(dia.dateString)}
-                    markedDates={{
-                        [selectedDate]: {
-                            selected: true,
-                            selectedColor: isDark ? "#78c0e0ff" : "#78c0e0ff",
-                            selectedTextColor: "white",
-                        },
-                    }}
-                    theme={{
-                        backgroundColor: isDark ? "#202020" : "#f8f8f8", // fundo geral
-                        calendarBackground: isDark ? "#202020" : "#ffffff", // fundo do calendário
-                        textSectionTitleColor: isDark ? "#9ca3af" : "#374151",
-                        todayTextColor: isDark ? "#60a5fa" : "#3943b7ff",
-                        dayTextColor: isDark ? "#f3f4f6" : "#111827",
-                        monthTextColor: isDark ? "#f3f4f6" : "#111827",
-                        arrowColor: isDark ? "#e5e7eb" : "#202020",
-                        textDayFontWeight: "light",
-                        textMonthFontWeight: "light",
-                        textDayFontSize: 16,
-                        textMonthFontSize: 18,
-                    }}
-                />
-
-            </View>
-
-            <View className="flex-row justify-around items-center mb-10">
-                {/* Hora de Início */}
+                {/* Botão para abrir o Modal do Calendário */}
                 <TouchableOpacity
-                    className={`w-[40%] h-14 ml-3 justify-center items-center rounded-xl border flex-row
-    ${isDark ? "bg-fundo-escuro-principal border-gray-600" : "bg-white border-gray-300"}`}
-                    onPress={() => setShowStartPicker(true)}
+                    className={`w-full h-12 px-4 mt-6 rounded-xl flex-row items-center justify-between ${isDark
+                        ? "bg-fundo-escuro-principal border border-gray-600"
+                        : "bg-white border border-gray-300"
+                        }`}
+                    onPress={() => setIsCalendarVisible(true)}
                 >
-                    <Ionicons name="time-outline" size={20} color={isDark ? "white" : "black"} />
-                    <Text className={`text-lg ml-2 font-quicksand-semibold ${isDark ? "text-white" : "text-gray-700"}`}>
-                        {formatTime(startTime)}
+                    <Text
+                        className={`font-quicksand-semibold text-lg ${selectedDate
+                            ? isDark
+                                ? "text-white"
+                                : "text-gray-700"
+                            : "text-gray-400"
+                            }`}
+                    >
+                        {selectedDate ? selectedDate : "Selecione uma data"}
                     </Text>
-                </TouchableOpacity>
-
-                {/* Hora de Fim */}
-                <TouchableOpacity
-                    className={`w-[40%] h-14 mr-3 justify-center items-center rounded-xl border flex-row
-    ${isDark ? "bg-fundo-escuro-principal border-gray-600" : "bg-white border-gray-300"}`}
-                    onPress={() => setShowEndPicker(true)}
-                >
-                    <Ionicons name="time-outline" size={20} color={isDark ? "white" : "black"} />
-                    <Text className={`text-lg ml-2 font-quicksand-semibold ${isDark ? "text-white" : "text-gray-700"}`}>
-                        {formatTime(endTime)}
-                    </Text>
+                    <Ionicons
+                        name="calendar-outline"
+                        size={20}
+                        color={isDark ? "white" : "black"}
+                    />
                 </TouchableOpacity>
             </View>
 
-            {/* Picker de Início */}
-            {showStartPicker && (
-                <DateTimePicker
+            <View className="flex-row justify-around items-center mb-[30rem]">
+                <CustomTimePickerDropdown
                     value={startTime}
-                    mode="time"
-                    is24Hour={true}
-                    display={Platform.OS === "ios" ? "spinner" : "default"}
-                    onChange={(event, date) => {
-                        setShowStartPicker(false);
-                        if (date) setStartTime(date);
-                    }}
+                    onChange={setStartTime}
+                    isDark={isDark}
                 />
-            )}
 
-            {/* Picker de Fim */}
-            {showEndPicker && (
-                <DateTimePicker
+                <Ionicons
+                    name="arrow-forward-outline"
+                    size={20}
+                    color={isDark ? "#9ca3af" : "#374151"} // Uma cor sutil
+                />
+
+                <CustomTimePickerDropdown
                     value={endTime}
-                    mode="time"
-                    is24Hour={true}
-                    display={Platform.OS === "ios" ? "spinner" : "default"}
-                    onChange={(event, date) => {
-                        setShowEndPicker(false);
-                        if (date) setEndTime(date);
-                    }}
+                    onChange={setEndTime}
+                    isDark={isDark}
                 />
-            )}
+            </View>
 
+            {/* Botão Salvar e Alerta */}
             <View className="flex-row justify-around mb-14">
                 <ButtonEs
                     title="Salvar lembrete"
@@ -230,7 +201,6 @@ export default function AddReminder() {
                     className="w-[90%] bg-azul-celeste py-3 rounded-xl"
                     textClassName="text-white text-lg text-center font-quicksand-bold"
                 />
-
                 <CustomAlert
                     visible={alertVisible}
                     onClose={() => setAlertVisible(false)}
@@ -244,6 +214,44 @@ export default function AddReminder() {
                     }}
                 />
             </View>
+
+            {/* Modal do Calendário */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isCalendarVisible}
+                onRequestClose={() => {
+                    setIsCalendarVisible(!isCalendarVisible);
+                }}
+            >
+                <View
+                    className="flex-1 justify-center items-center"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                >
+                    <View
+                        className={`w-11/12 p-4 rounded-lg ${isDark ? "bg-fundo-escuro-principal" : "bg-white"
+                            }`}
+                    >
+                        <CustomCalendar
+                            selectedDate={selectedDate}
+                            isDark={isDark}
+                            onDayPress={(day) => {
+                                setSelectedDate(day.dateString);
+                                setIsCalendarVisible(false);
+                            }}
+                        />
+
+                        <ButtonEs
+                            title="Fechar"
+                            onPress={() => setIsCalendarVisible(false)}
+                            className="w-full bg-gray-500 py-3 rounded-xl mt-4"
+                            textClassName="text-white text-lg text-center font-quicksand-bold"
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Navegação Inferior */}
             <BottomNavigation
                 currentRoute={currentRoute}
                 onNavigate={handleNavigation}

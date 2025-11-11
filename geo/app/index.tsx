@@ -43,7 +43,6 @@ export default function Onboarding() {
     const [isLoading, setIsLoading] = useState(true);
     const flatListRef = useRef<FlatList>(null);
 
-    // Verificar se o usuário já viu o onboarding
     useEffect(() => {
         checkOnboardingStatus();
     }, []);
@@ -53,10 +52,8 @@ export default function Onboarding() {
             const hasSeenOnboarding = await AsyncStorage.getItem(ONBOARDING_KEY);
 
             if (hasSeenOnboarding === "true") {
-                // Se já viu, redireciona para login
                 router.replace("/screens/auth/login");
             } else {
-                // Se não viu, mostra o onboarding
                 setIsLoading(false);
             }
         } catch (error) {
@@ -77,7 +74,6 @@ export default function Onboarding() {
         if (currentIndex < slides.length - 1) {
             flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
         } else {
-            // Último slide - marcar como visto e navegar para login
             await markOnboardingAsSeen();
             router.replace("/screens/auth/login");
         }
@@ -123,7 +119,6 @@ export default function Onboarding() {
                 )}
             />
 
-            {/* Indicadores */}
             <View className="flex-row justify-center mb-6">
                 {slides.map((_, index) => (
                     <View
@@ -133,7 +128,6 @@ export default function Onboarding() {
                 ))}
             </View>
 
-            {/* Botão */}
             <View className="px-8 mb-16">
                 <TouchableOpacity
                     onPress={handleNext}
