@@ -2,6 +2,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import ButtonEs from "@/components/ButtonEs";
 import CustomAlert from "@/components/CustomAlert";
 import CustomCalendar from "@/components/CustomCalendar";
+import GeofencingModal from "@/components/GeofencingModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -14,7 +15,6 @@ import {
     View,
     useColorScheme
 } from "react-native";
-// A importação do 'Calendar' é usada pelo 'LocaleConfig'
 import CustomTimePickerDropdown from "@/components/CustomTimePickerDropdown";
 import { LocaleConfig } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -38,30 +38,33 @@ LocaleConfig.locales["pt-br"] = {
 };
 LocaleConfig.defaultLocale = "pt-br";
 
+type GeofencePoint = {
+    latitude: number;
+    longitude: number;
+    radiusMeters: number;
+    name?: string; // Adicionado para visualização
+};
+
 export default function AddReminder() {
     const { user } = useAuth();
-    const theme = useColorScheme(); // light | dark
+    const theme = useColorScheme();
     const isDark = theme === "dark";
 
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [currentRoute, setCurrentRoute] = useState("calendar");
-    const [alertVisible, setAlertVisible] = useState(false);
 
-    const [location, setLocation] = useState<{
-        latitude: number;
-        longitude: number;
-    } | null>(null);
+    // Estado para armazenar MÚLTIPLAS localizações (Array)
+    const [locations, setLocations] = useState<GeofencePoint[]>([]);
 
     const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
+    const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
 
-    // Estados para horário de início e fim
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
 
-    // Campo de título
     const [title, setTitle] = useState("");
-    const [isCalendarVisible, setIsCalendarVisible] = useState(false);
+
 
     const salvarLembrete = async () => {
         if (!user) {
@@ -69,32 +72,56 @@ export default function AddReminder() {
             return;
         }
 
+        // 1. Mapeia as localizações do state para o formato do Prisma (apenas dados necessários para o DB)
+        const geofencesToCreate = locations.map(loc => ({
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            radius: loc.radiusMeters,
+            // NÃO inclua o 'name' aqui, pois ele não existe no modelo Geofencing do Prisma.
+        }));
+
+        // 2. Constrói o corpo da requisição
+        const requestBody = {
+            title,
+            date: selectedDate,
+            startTime,
+            endTime,
+            userId: user.id,
+
+            // Adiciona o bloco 'create' apenas se houver localizações
+            geofencing: geofencesToCreate.length > 0
+                ? {
+                    create: geofencesToCreate
+                }
+                : undefined,
+
+            // ✅ CORREÇÃO: Certifique-se de que NÃO há nenhum campo 'locations' aqui.
+        };
+
+        console.log("🔍 Payload Final:", JSON.stringify(requestBody, null, 2));
+
         try {
             const response = await fetch(
                 "https://geofencing-api.onrender.com/api/reminders",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        title,
-                        date: selectedDate,
-                        startTime,
-                        endTime,
-                        userId: user.id,
-                    }),
+                    body: JSON.stringify(requestBody),
                 }
             );
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error("Erro ao salvar lembrete:", errorData);
+                console.error("❌ Erro ao salvar lembrete:", errorData);
                 return;
             }
 
             const data = await response.json();
             console.log("✅ Lembrete salvo com sucesso:", data);
+
+
         } catch (error) {
-            console.error("Erro na requisição:", error);
+            console.error("❌ Erro na requisição:", error);
         }
     };
 
@@ -125,6 +152,21 @@ export default function AddReminder() {
             .toString()
             .padStart(2, "0")}`;
 
+    // 💡 LÓGICA DE VISUALIZAÇÃO ATUALIZADA
+    const locationText = (() => {
+        if (locations.length === 0) {
+            return "Adicionar localização (Geofencing)";
+        }
+        if (locations.length === 1) {
+            const loc = locations[0];
+            // Mostra o nome se existir, senão mostra coordenadas
+            return loc.name || `Local: ${loc.latitude.toFixed(5)}, ${loc.longitude.toFixed(5)}`;
+        }
+        // Mais de um local selecionado
+        return `${locations.length} localizaç${locations.length > 1 ? 'ões' : 'ão'} selecionada(s)`;
+    })();
+
+
     return (
         <SafeAreaView
             className={`flex-1 ${isDark ? "bg-fundo-escuro-principal" : "bg-slate-100"}`}
@@ -152,22 +194,21 @@ export default function AddReminder() {
                 />
 
 
+                {/* Botão para abrir o Modal de Localização (Geofencing) */}
                 <TouchableOpacity
                     className={`w-full h-12 px-4 mt-6 rounded-xl flex-row items-center justify-between ${isDark
-                            ? "bg-fundo-escuro-principal border border-gray-600"
-                            : "bg-white border border-gray-300"
+                        ? "bg-fundo-escuro-principal border border-gray-600"
+                        : "bg-white border border-gray-300"
                         }`}
                     onPress={() => setIsLocationModalVisible(true)}
                 >
                     <Text
-                        className={`font-quicksand-semibold text-lg ${location
-                                ? isDark ? "text-white" : "text-gray-700"
-                                : "text-gray-400"
+                        className={`font-quicksand-semibold text-lg ${locations.length > 0
+                            ? isDark ? "text-white" : "text-gray-700"
+                            : "text-gray-400"
                             }`}
                     >
-                        {location
-                            ? `Lat: ${location.latitude.toFixed(5)}, Lng: ${location.longitude.toFixed(5)}`
-                            : "Adicionar localização"}
+                        {locationText}
                     </Text>
 
                     <Ionicons
@@ -205,7 +246,7 @@ export default function AddReminder() {
                 </TouchableOpacity>
             </View>
 
-            <View className="flex-row justify-around items-center mb-[30rem]">
+            <View className="flex-row justify-around items-center mb-[11rem]">
                 <CustomTimePickerDropdown
                     value={startTime}
                     onChange={setStartTime}
@@ -215,7 +256,7 @@ export default function AddReminder() {
                 <Ionicons
                     name="arrow-forward-outline"
                     size={20}
-                    color={isDark ? "#9ca3af" : "#374151"} // Uma cor sutil
+                    color={isDark ? "#9ca3af" : "#374151"}
                 />
 
                 <CustomTimePickerDropdown
@@ -226,28 +267,16 @@ export default function AddReminder() {
             </View>
 
             {/* Botão Salvar e Alerta */}
-            <View className="flex-row justify-around mb-14">
+            <View className="flex-row justify-around mb-[18rem]">
                 <ButtonEs
                     title="Salvar lembrete"
-                    onPress={() => setAlertVisible(true)}
+                    onPress={salvarLembrete}
                     className="w-[90%] bg-azul-celeste py-3 rounded-xl"
                     textClassName="text-white text-lg text-center font-quicksand-bold"
                 />
-                <CustomAlert
-                    visible={alertVisible}
-                    onClose={() => setAlertVisible(false)}
-                    onSave={() => {
-                        salvarLembrete();
-                        setAlertVisible(false);
-                    }}
-                    onLocation={() => {
-                        router.push("/screens/main/geofencing");
-                        setAlertVisible(false);
-                    }}
-                />
             </View>
 
-            {/* Modal do Calendário */}
+            {/* Modal do Calendário (mantido) */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -282,6 +311,20 @@ export default function AddReminder() {
                     </View>
                 </View>
             </Modal>
+
+            <GeofencingModal
+                visible={isLocationModalVisible}
+                onClose={() => setIsLocationModalVisible(false)}
+                onLocationSelect={(dataArray) => {
+                    setLocations(dataArray.map(data => ({
+                        latitude: data.latitude,
+                        longitude: data.longitude,
+                        radiusMeters: data.radius,
+
+                    })));
+                    setIsLocationModalVisible(false);
+                }}
+            />
 
             {/* Navegação Inferior */}
             <BottomNavigation

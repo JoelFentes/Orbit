@@ -6,7 +6,6 @@ import { useColorScheme } from "nativewind";
 import GeofenceMap, { Place } from '@/components/GeofencingMap';
 import PlaceAutocomplete from '@/components/PlaceAutocomplete';
 import CategoryCarousel from '@/components/CategoryCarousel';
-import GeofencingTutorial from "@/components/GeofencingTutorial";
 import ButtonEs from '@/components/ButtonEs';
 
 type LatLng = { latitude: number; longitude: number } | null;
@@ -70,11 +69,7 @@ export default function GeofencingScreen() {
                 <Ionicons name="help-outline" size={26} color={isDark ? "white" : "black"} />
             </TouchableOpacity>
 
-            {/* Tutorial modal */}
-            <GeofencingTutorial
-                visible={showTutorial}
-                onClose={() => setShowTutorial(false)}
-            />
+
 
             {/* Autocomplete */}
             <View className="w-[95%] absolute top-8">
@@ -84,7 +79,7 @@ export default function GeofencingScreen() {
                     onPlaceSelected={(description, location) => {
                         if (location) {
                             setCustomPoint(location);
-                            setSelectedCategory(null); 
+                            setSelectedCategory(null);
                             mapRef.current?.animateToRegion({
                                 latitude: location.latitude,
                                 longitude: location.longitude,
@@ -138,17 +133,17 @@ export default function GeofencingScreen() {
                 </TouchableOpacity>
             </View>
 
-           <ButtonEs
-            title='Adicionar Localização' className='absolute bottom-16 w-[90%] items-center rounded py-4 bg-acento-primario' onPress={() => {
-                            if (customPoint) { // Verifique se há um ponto personalizado/selecionado
-                                Alert.alert(
-                                    "Localização Adicionada",
-                                    `Localização adicionada em:\nLat: ${customPoint.latitude.toFixed(5)}, Lon: ${customPoint.longitude.toFixed(5)}`
-                                );
-                            } else {
-                                Alert.alert("Erro", "Nenhuma localização selecionada.");
-                            }
-                        }}>
+            <ButtonEs
+                title='Adicionar Localização' className='absolute bottom-16 w-[90%] items-center rounded py-4 bg-acento-primario' onPress={() => {
+                    if (customPoint) { // Verifique se há um ponto personalizado/selecionado
+                        Alert.alert(
+                            "Localização Adicionada",
+                            `Localização adicionada em:\nLat: ${customPoint.latitude.toFixed(5)}, Lon: ${customPoint.longitude.toFixed(5)}`
+                        );
+                    } else {
+                        Alert.alert("Erro", "Nenhuma localização selecionada.");
+                    }
+                }}>
             </ButtonEs>
         </View>
     );

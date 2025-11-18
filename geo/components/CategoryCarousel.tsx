@@ -47,13 +47,17 @@ const fetchPlacesByCategory = async (category: string, location: LatLng, apiKey:
     try {
         const response = await fetch(url);
         const data = await response.json();
-        if (data.status === "OK") return data.results.map((p: any) => ({
-            id: p.place_id,
-            name: p.name,
-            location: { latitude: p.geometry.location.lat, longitude: p.geometry.location.lng },
-        }));
-        console.warn("Places API error:", data.status, data.error_message);
-        return [];
+
+        if (data.status === "OK") {
+            // ✅ FILTRAGEM: Pega apenas os 10 primeiros resultados (que já vêm ordenados por proximidade)
+            const top10Results = data.results.slice(0, 10);
+
+            return top10Results.map((p: any) => ({
+                id: p.place_id,
+                name: p.name,
+                location: { latitude: p.geometry.location.lat, longitude: p.geometry.location.lng },
+            }));
+        }
     } catch (error) {
         console.error(error);
         return [];
