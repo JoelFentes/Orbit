@@ -18,6 +18,9 @@ import {
 import CustomTimePickerDropdown from "@/components/CustomTimePickerDropdown";
 import { LocaleConfig } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+import { GEOFENCING_TASK_NAME } from "@/tasks/GeofencingTask";
 
 // Configurações de localização para português
 LocaleConfig.locales["pt-br"] = {
@@ -43,6 +46,45 @@ type GeofencePoint = {
     longitude: number;
     radiusMeters: number;
     name?: string; // Adicionado para visualização
+};
+
+const startGeofencing = async (locations: GeofencePoint[]) => {
+    if (locations.length === 0) return;
+
+    // 1. Solicita Permissões (Foreground e Background)
+    let { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+    let { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+
+    if (foregroundStatus !== 'granted' || backgroundStatus !== 'granted') {
+        // Alerta simples para o usuário, mas a permissão real deve ser concedida nas configurações do APK
+        alert('As permissões de localização em segundo plano são essenciais para esta funcionalidade.');
+        return;
+    }
+
+    // 2. Mapeia para o formato de Região do Expo Location
+    const regions: Location.LocationRegion[] = locations.map((loc, index) => ({
+        // Use o nome do local como identificador. Se não tiver nome, use algo único.
+        identifier: loc.name || `Lembrete Local ${loc.latitude.toFixed(4)}`,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        radius: loc.radiusMeters,
+        notifyOnEnter: true,
+        notifyOnExit: false,
+    }));
+
+    // 3. Garante que a task está definida e para monitoramentos anteriores (opcional)
+    if (!TaskManager.isTaskDefined(GEOFENCING_TASK_NAME)) {
+        console.error("Tarefa de Geofencing não definida!");
+        return;
+    }
+
+    // Você pode querer parar o monitoramento anterior se estiver fazendo vários testes
+    // await Location.stopGeofencingAsync(GEOFENCING_TASK_NAME);
+
+    // 4. Inicia o monitoramento
+    await Location.startGeofencingAsync(GEOFENCING_TASK_NAME, regions);
+
+    console.log(`✅ ${regions.length} geofences registrados para monitoramento.`);
 };
 
 export default function AddReminder() {
@@ -77,7 +119,6 @@ export default function AddReminder() {
             latitude: loc.latitude,
             longitude: loc.longitude,
             radius: loc.radiusMeters,
-            // NÃO inclua o 'name' aqui, pois ele não existe no modelo Geofencing do Prisma.
         }));
 
         // 2. Constrói o corpo da requisição
@@ -95,10 +136,8 @@ export default function AddReminder() {
                 }
                 : undefined,
 
-            // ✅ CORREÇÃO: Certifique-se de que NÃO há nenhum campo 'locations' aqui.
         };
 
-        console.log("🔍 Payload Final:", JSON.stringify(requestBody, null, 2));
 
         try {
             const response = await fetch(
@@ -117,6 +156,7 @@ export default function AddReminder() {
             }
 
             const data = await response.json();
+            await startGeofencing(locations);
             console.log("✅ Lembrete salvo com sucesso:", data);
 
 
@@ -152,7 +192,6 @@ export default function AddReminder() {
             .toString()
             .padStart(2, "0")}`;
 
-    // 💡 LÓGICA DE VISUALIZAÇÃO ATUALIZADA
     const locationText = (() => {
         if (locations.length === 0) {
             return "Adicionar localização (Geofencing)";

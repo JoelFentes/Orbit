@@ -10,6 +10,7 @@ import {
 } from "@expo-google-fonts/quicksand";
 import '../global.css'
 import { AuthProvider } from "@/contexts/AuthContext";
+import '@/tasks/GeofencingTask';
 
 
 export default function Layout() {
@@ -26,5 +27,5 @@ export default function Layout() {
   }
 
   return <AuthProvider> <Stack screenOptions={{ headerShown: false }} /> </AuthProvider>;
-  
+
 }
