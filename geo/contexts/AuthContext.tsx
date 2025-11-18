@@ -3,36 +3,35 @@ import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
 import { router } from 'expo-router';
 
-// Interface do payload do JWT (ajuste conforme seu backend)
+// Interface do payload do JWT
 interface DecodedToken {
   sub: string;
-  name: string;
-  email: string;
   exp?: number;
 }
 
-// Interface do usuário que vamos guardar
+// Interface do usuário salvo no app
 interface User {
   id: string;
   name: string;
   email: string;
+  photo?: string | null;
 }
 
 interface AuthContextData {
   user: User | null;
   userToken: string | null;
   isLoading: boolean;
-  login: (token: string, userFromApi?: any) => Promise<void>; // 👈 agora aceita user
+  login: (token: string, userFromApi?: any) => Promise<void>;
   logout: () => Promise<void>;
+  updateUserProfile: (name: string, photo?: string | null) => void;
   isAuthenticated: boolean;
+  
 }
-
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Criar o contexto com tipo
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const useAuth = (): AuthContextData => {
@@ -48,59 +47,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Executado quando o app abre
   useEffect(() => {
-    console.log('AuthProvider mounted - Carregando token...');
-    loadToken();
+    loadTokenAndUser();
   }, []);
 
-  useEffect(() => {
-    async function checkToken() {
-      const token = await SecureStore.getItemAsync("userToken");
-      if (token) {
-        await login(token);
-        router.replace("../main/home");
-      }
-    }
-    checkToken();
-  }, []);
-
-
-  const decodeAndSetUser = (token: string) => {
+  // Carrega token do SecureStore e busca usuário completo no backend
+  const loadTokenAndUser = async (): Promise<void> => {
     try {
-      const decoded = jwtDecode<DecodedToken>(token);
-      setUser({
-        id: decoded.sub,
-        name: decoded.name,
-        email: decoded.email,
-      });
-    } catch (err) {
-      console.error('Erro ao decodificar token:', err);
-      setUser(null);
-    }
-  };
-
-  const loadToken = async (): Promise<void> => {
-    try {
-      console.log('Buscando token no SecureStore...');
       const token = await SecureStore.getItemAsync('userToken');
+
       if (token) {
-        console.log('Token encontrado:', token.substring(0, 20) + '...');
         setUserToken(token);
-        decodeAndSetUser(token);
-      } else {
-        console.log('Nenhum token encontrado no SecureStore');
+
+        // Decodifica apenas o ID do usuário
+        const decoded = jwtDecode<DecodedToken>(token);
+
+        if (decoded?.sub) {
+          // Busca os dados completos do usuário no backend
+          const response = await fetch(`http://192.168.18.12:4000/users/${decoded.sub}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          const data = await response.json();
+          setUser({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            photo: data.photo ?? null
+          });
+        }
       }
     } catch (error) {
-      console.error('Erro ao carregar token:', error);
+      console.error("Erro ao carregar token e usuário:", error);
     } finally {
-      console.log('Loading finalizado');
       setIsLoading(false);
     }
   };
 
+  // Login do usuário
   const login = async (token: string, userFromApi?: any): Promise<void> => {
     try {
-      console.log('Salvando token no SecureStore...');
       await SecureStore.setItemAsync('userToken', token);
       setUserToken(token);
 
@@ -109,35 +96,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: userFromApi.id,
           name: userFromApi.name,
           email: userFromApi.email,
+          photo: userFromApi.photo ?? null,
         });
-      } else {
-        decodeAndSetUser(token);
       }
 
-      console.log('Token salvo e usuário carregado!');
+      router.replace("/screens/main/home");
+
     } catch (error) {
-      console.error('Erro ao salvar token:', error);
+      console.error('Erro ao fazer login:', error);
       throw error;
     }
   };
 
+  // Atualizar nome e foto do usuário no contexto
+  const updateUserProfile = (name: string, photo?: string | null) => {
+    setUser((prev) =>
+      prev
+        ? {
+            ...prev,
+            name,
+            photo: photo ?? prev.photo,
+          }
+        : prev
+    );
+  };
 
   const logout = async (): Promise<void> => {
     try {
-      console.log('Removendo token do SecureStore...');
       await SecureStore.deleteItemAsync('userToken');
       setUserToken(null);
       setUser(null);
-      console.log('Token removido e usuário limpo!');
+      router.replace("/screens/auth/login");
     } catch (error) {
-      console.error('Erro ao remover token:', error);
+      console.error('Erro ao sair:', error);
     }
   };
-
-  useEffect(() => {
-    console.log('Token atualizado:', userToken ? 'Token presente' : 'Token null');
-    console.log('Usuário autenticado:', !!userToken);
-  }, [userToken]);
 
   const value: AuthContextData = {
     user,
@@ -145,6 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     logout,
+    updateUserProfile,
     isAuthenticated: !!userToken,
   };
 

@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, View, Image, ScrollView, TouchableOpacity, Switch } from "react-native";
+import { Text, View, Image, ScrollView, TouchableOpacity, Switch, Button } from "react-native";
 import BottomNavigation from "../../../components/BottomNavigation";
 import { useState } from "react";
 import { router } from "expo-router";
@@ -67,17 +67,31 @@ export default function Profile() {
         </Text>
 
         <View className="flex-1 items-center justify-center mt-10">
-          <Ionicons
-            name="person-circle-outline"
-            size={120}
-            color={colorScheme === "dark" ? "#b2daffff" : "#78c0e0ff"}
-          />
+          {user?.photo ? (
+            <Image
+              source={{ uri: user.photo }}
+              className="w-32 h-32 rounded-full"
+              style={{ width: 120, height: 120, borderRadius: 60 }}
+            />
+          ) : (
+            <Ionicons
+              name="person-circle-outline"
+              size={120}
+              color={colorScheme === "dark" ? "#b2daffff" : "#78c0e0ff"}
+            />
+        )}
+
           <Text className="text-2xl font-quicksand-bold text-azul-escuro dark:text-texto-claro-principal mt-4">
             {user?.name ?? "Visitante"}
           </Text>
           <Text className="text-base font-quicksand text-gray-600 dark:text-texto-claro-secundario mt-1">
             {user?.email ?? ""}
           </Text>
+          <Button
+            title="Editar Perfil"
+            onPress={() => router.push("../main/editProfile")}
+          />
+
 
           {/* Switch para alternar tema */}
           <View className="flex-row items-center mt-6">
@@ -107,5 +121,8 @@ export default function Profile() {
         onNavigate={handleNavigation}
       />
     </SafeAreaView>
+    
+    
   );
+  
 }
