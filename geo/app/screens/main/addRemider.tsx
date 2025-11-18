@@ -1,26 +1,23 @@
 import BottomNavigation from "@/components/BottomNavigation";
 import ButtonEs from "@/components/ButtonEs";
 import CustomAlert from "@/components/CustomAlert";
-import { useAuth } from "@/contexts/AuthContext";
 import CustomCalendar from "@/components/CustomCalendar";
+import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
     Modal,
-    Platform,
     Text,
     TextInput,
     TouchableOpacity,
     View,
-    useColorScheme,
+    useColorScheme
 } from "react-native";
 // A importação do 'Calendar' é usada pelo 'LocaleConfig'
-import { Calendar, LocaleConfig } from "react-native-calendars";
-import { SafeAreaView } from "react-native-safe-area-context";
-import TimePickerDropdown from "@/components/CustomTimePickerDropdown";
 import CustomTimePickerDropdown from "@/components/CustomTimePickerDropdown";
+import { LocaleConfig } from "react-native-calendars";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Configurações de localização para português
 LocaleConfig.locales["pt-br"] = {
@@ -50,6 +47,14 @@ export default function AddReminder() {
     const [currentRoute, setCurrentRoute] = useState("calendar");
     const [alertVisible, setAlertVisible] = useState(false);
 
+    const [location, setLocation] = useState<{
+        latitude: number;
+        longitude: number;
+    } | null>(null);
+
+    const [isLocationModalVisible, setIsLocationModalVisible] = useState(false);
+
+
     // Estados para horário de início e fim
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
@@ -72,7 +77,6 @@ export default function AddReminder() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         title,
-                        // description, // Você referencia 'description' aqui, mas não há estado para ele.
                         date: selectedDate,
                         startTime,
                         endTime,
@@ -146,6 +150,34 @@ export default function AddReminder() {
     ${isDark ? "bg-fundo-escuro-principal border border-gray-600 text-white" : "bg-white border border-gray-300 text-gray-700"}`}
                     placeholderTextColor={isDark ? "#9ca3af" : "#9ca3af"}
                 />
+
+
+                <TouchableOpacity
+                    className={`w-full h-12 px-4 mt-6 rounded-xl flex-row items-center justify-between ${isDark
+                            ? "bg-fundo-escuro-principal border border-gray-600"
+                            : "bg-white border border-gray-300"
+                        }`}
+                    onPress={() => setIsLocationModalVisible(true)}
+                >
+                    <Text
+                        className={`font-quicksand-semibold text-lg ${location
+                                ? isDark ? "text-white" : "text-gray-700"
+                                : "text-gray-400"
+                            }`}
+                    >
+                        {location
+                            ? `Lat: ${location.latitude.toFixed(5)}, Lng: ${location.longitude.toFixed(5)}`
+                            : "Adicionar localização"}
+                    </Text>
+
+                    <Ionicons
+                        name="location-outline"
+                        size={20}
+                        color={isDark ? "white" : "black"}
+                    />
+                </TouchableOpacity>
+
+
 
                 {/* Botão para abrir o Modal do Calendário */}
                 <TouchableOpacity
