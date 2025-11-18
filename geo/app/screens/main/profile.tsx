@@ -87,10 +87,14 @@ export default function Profile() {
           <Text className="text-base font-quicksand text-gray-600 dark:text-texto-claro-secundario mt-1">
             {user?.email ?? ""}
           </Text>
-          <Button
-            title="Editar Perfil"
+          <TouchableOpacity
+            className="mt-10 bg-azul-celeste dark:bg-acento-primario w-40 py-3 rounded-xl items-center justify-center"
             onPress={() => router.push("../main/editProfile")}
-          />
+          >
+            <Text
+            className="text-white font-quicksand-bold text-lg"
+            >Editar Perfil</Text>
+          </TouchableOpacity>
 
 
           {/* Switch para alternar tema */}

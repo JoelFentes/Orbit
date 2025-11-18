@@ -26,6 +26,11 @@
       ],
       "package": "com.joelfentes.geo"
     },
+    "config": {
+      "googleMaps": {
+        "apiKey": "AIzaSyDyzvSaODwJe39S20kjuA9y-y2lufQ3P6c"
+      }
+    },
     "web": {
       "bundler": "metro",
       "output": "static",
