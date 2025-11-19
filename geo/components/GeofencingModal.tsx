@@ -1,13 +1,13 @@
-import ButtonEs from "@/components/ButtonEs";
-import CategoryCarousel from "@/components/CategoryCarousel";
-import GeofenceMap, { Place } from "@/components/GeofencingMap";
-import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useColorScheme } from "nativewind";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Modal, TouchableOpacity, View, Linking } from "react-native";
 import MapView from "react-native-maps";
+import CategoryCarousel from "./CategoryCarousel";
+import ButtonEs from "./ButtonEs";
+import PlaceAutocomplete from "./PlaceAutocomplete";
+import GeofenceMap from "./GeofencingMap";
 
 type LatLng = { latitude: number; longitude: number } | null;
 
@@ -15,7 +15,7 @@ interface GeofencingModalProps {
     visible: boolean;
     onClose: () => void;
     // Permite enviar um array de localizações
-    onLocationSelect: (locations: { latitude: number; longitude: number; radius: number }[]) => void;
+    onLocationSelect: (locations: { latitude: number; longitude: number; radius: number, name?: string }[]) => void;
 }
 
 const GeofencingModal = ({
@@ -44,45 +44,48 @@ const GeofencingModal = ({
         if (!visible) return;
 
         (async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
+            try { // 🚨 Adicionado try/catch para capturar erros nativos
+                let { status } = await Location.requestForegroundPermissionsAsync();
 
-            if (status !== "granted") {
-                Alert.alert(
-                    "Permissão Necessária",
-                    "Para usar o mapa, precisamos da sua localização. Por favor, libere a permissão nas configurações do seu dispositivo.",
-                    [
-                        {
-                            text: "Cancelar",
-                            style: "cancel"
-                        },
-                        {
-                            text: "Abrir Configurações",
-                            onPress: () => {
-                                Linking.openSettings();
+                if (status !== "granted") {
+                    Alert.alert(
+                        "Permissão Necessária",
+                        "Para usar o mapa e o geofencing, precisamos da sua localização em primeiro plano.",
+                        [
+                            { text: "Cancelar", style: "cancel" },
+                            {
+                                text: "Abrir Configurações",
+                                onPress: () => {
+                                    Linking.openSettings();
+                                },
                             },
-                        },
-                    ],
-                    { cancelable: false }
-                );
-                return;
-            }
+                        ],
+                        { cancelable: false }
+                    );
+                    return;
+                }
 
-            let loc = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Highest,
-            });
-            const { latitude, longitude } = loc.coords;
-            setUserLocation({ latitude, longitude });
+                let loc = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Highest,
+                });
+                const { latitude, longitude } = loc.coords;
+                setUserLocation({ latitude, longitude });
 
-            if (!customPoint) {
-                setRegion((r) => ({ ...r, latitude, longitude }));
-                setCustomPoint({ latitude, longitude });
+                if (!customPoint) {
+                    setRegion((r) => ({ ...r, latitude, longitude }));
+                    setCustomPoint({ latitude, longitude });
+                }
+            } catch (error: any) {
+                // 🛑 ESTE ALERT VAI MOSTRAR O ERRO NATIVO EXATO NO SEU APK
+                Alert.alert("ERRO NATIVO NO MAPA/LOCALIZAÇÃO", error.message || "Erro desconhecido ao obter a localização. Verifique as dependências nativas (Chaves API).");
+                console.error("Erro no GeofencingModal useEffect:", error);
             }
         })();
     }, [visible]);
 
     // Função para confirmar e fechar o modal
     const handleAddLocation = () => {
-        let pointsToSend: { latitude: number; longitude: number; radius: number }[] = [];
+        let pointsToSend: { latitude: number; longitude: number; radius: number, name?: string }[] = [];
 
         if (selectedCategory && places.length > 0) {
             // Se uma categoria foi selecionada, envia TODOS os lugares pesquisados (ex: 10 farmácias)
@@ -90,10 +93,15 @@ const GeofencingModal = ({
                 latitude: p.location.latitude,
                 longitude: p.location.longitude,
                 radius: radiusMeters,
+                name: p.name, // Inclui o nome do local
             }));
         } else if (customPoint) {
             // Se foi um ponto customizado (clique longo ou autocomplete), envia APENAS esse ponto
-            pointsToSend = [{ ...customPoint, radius: radiusMeters }];
+            pointsToSend = [{
+                ...customPoint,
+                radius: radiusMeters,
+                name: "Ponto Personalizado" // Nome padrão para pontos manuais
+            }];
         } else {
             Alert.alert("Erro", "Selecione uma categoria ou marque um ponto no mapa.");
             return;
@@ -145,6 +153,7 @@ const GeofencingModal = ({
                     {/* Autocomplete - Replicando o posicionamento da tela principal */}
                     <View className="w-[95%] absolute top-8 items-center self-center">
                         <PlaceAutocomplete
+                            // ⚠️ ATENÇÃO: Esta chave API deve ser substituída pela sua chave Google Maps/Places.
                             apiKey="AIzaSyDyzvSaODwJe39S20kjuA9y-y2lufQ3P6c"
                             userLocation={userLocation}
                             onPlaceSelected={(description, location) => {

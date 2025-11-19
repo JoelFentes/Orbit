@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/orbita.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -28,7 +28,7 @@
     },
     "config": {
       "googleMaps": {
-        "apiKey": "AIzaSyDyzvSaODwJe39S20kjuA"
+        "apiKey": "AIzaSyDyzvSaODwJe39S20kjuA9y-y2lufQ3P6c"
       }
     },
     "web": {

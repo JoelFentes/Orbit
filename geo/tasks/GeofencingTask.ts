@@ -6,7 +6,7 @@ import * as Notifications from 'expo-notifications';
 
 export const GEOFENCING_TASK_NAME = 'GEOFENCING_REMINDER_TASK';
 
-TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data, error }) => {
+TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data, error }: { data?: any; error?: any }) => {
     if (error) {
         console.error("Erro na tarefa de Geofencing:", error);
         return;
@@ -15,7 +15,7 @@ TaskManager.defineTask(GEOFENCING_TASK_NAME, async ({ data, error }) => {
     if (data && data.region && data.state) {
         const { region, state } = data as { region: Location.LocationRegion, state: Location.GeofencingRegionState };
         
-        if (state === Location.GeofencingRegionState.ENTER) {
+        if (state === Location.GeofencingRegionState.Enter) {
             // Dispara a notificação ao entrar na geofence
             Notifications.scheduleNotificationAsync({
                 content: {

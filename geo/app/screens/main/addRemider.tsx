@@ -51,40 +51,44 @@ type GeofencePoint = {
 const startGeofencing = async (locations: GeofencePoint[]) => {
     if (locations.length === 0) return;
 
-    // 1. Solicita Permissões (Foreground e Background)
-    let { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
-    let { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+    try { // 💡 Adiciona try...catch aqui para pegar o erro nativo
 
-    if (foregroundStatus !== 'granted' || backgroundStatus !== 'granted') {
-        // Alerta simples para o usuário, mas a permissão real deve ser concedida nas configurações do APK
-        alert('As permissões de localização em segundo plano são essenciais para esta funcionalidade.');
-        return;
+        // 1. Solicita Permissões (Foreground e Background)
+        let { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+        let { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+
+        if (foregroundStatus !== 'granted' || backgroundStatus !== 'granted') {
+            alert('ERRO: Permissões de localização em segundo plano são essenciais. Verifique se estão definidas como "Sempre permitir" nas configurações do seu celular.');
+            return;
+        }
+
+        // 2. Mapeia para o formato de Região do Expo Location
+        const regions: Location.LocationRegion[] = locations.map((loc, index) => ({
+            identifier: loc.name || `Lembrete Local ${loc.latitude.toFixed(4)}`,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            radius: loc.radiusMeters,
+            notifyOnEnter: true,
+            notifyOnExit: false,
+        }));
+
+        // 3. Garante que a task está definida
+        if (!TaskManager.isTaskDefined(GEOFENCING_TASK_NAME)) {
+            // Este erro é muito provável se você não importou a task no _layout.tsx
+            alert("ERRO CRÍTICO: Tarefa de Geofencing não foi definida. Verifique a importação no arquivo de Layout.");
+            return;
+        }
+
+        // 4. Inicia o monitoramento
+        await Location.startGeofencingAsync(GEOFENCING_TASK_NAME, regions);
+
+        console.log(`✅ ${regions.length} geofences registrados para monitoramento.`);
+
+    } catch (error: any) {
+        // 🚨 Se o crash for causado pela chamada startGeofencing, este alerta vai capturá-lo
+        alert(`ERRO FATAL DE GEOFENCING: ${error.message || String(error)}`);
+        console.error("ERRO FATAL DE GEOFENCING:", error);
     }
-
-    // 2. Mapeia para o formato de Região do Expo Location
-    const regions: Location.LocationRegion[] = locations.map((loc, index) => ({
-        // Use o nome do local como identificador. Se não tiver nome, use algo único.
-        identifier: loc.name || `Lembrete Local ${loc.latitude.toFixed(4)}`,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        radius: loc.radiusMeters,
-        notifyOnEnter: true,
-        notifyOnExit: false,
-    }));
-
-    // 3. Garante que a task está definida e para monitoramentos anteriores (opcional)
-    if (!TaskManager.isTaskDefined(GEOFENCING_TASK_NAME)) {
-        console.error("Tarefa de Geofencing não definida!");
-        return;
-    }
-
-    // Você pode querer parar o monitoramento anterior se estiver fazendo vários testes
-    // await Location.stopGeofencingAsync(GEOFENCING_TASK_NAME);
-
-    // 4. Inicia o monitoramento
-    await Location.startGeofencingAsync(GEOFENCING_TASK_NAME, regions);
-
-    console.log(`✅ ${regions.length} geofences registrados para monitoramento.`);
 };
 
 export default function AddReminder() {
