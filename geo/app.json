@@ -21,16 +21,18 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION"
       ],
-      "package": "com.joelfentes.geo"
-    },
-    "config": {
-      "googleMaps": {
-        "apiKey": "AIzaSyDyzvSaODwJe39S20kjuA9y-y2lufQ3P6c"
+      "package": "com.joelfentes.geo",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDyzvSaODwJe39S20kjuA9y-y2lufQ3P6c"
+        }
       }
     },
+    
     "web": {
       "bundler": "metro",
       "output": "static",
